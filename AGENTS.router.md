@@ -10,14 +10,21 @@ Module index:
   AGENTS.router.md     # routing and load conditions
   modules/
     common/AGENTS.md   # always loaded
-    go/AGENTS.md       # load for Go repositories/services
-    nextjs/AGENTS.md   # load for Next.js repositories/apps
+    typescript/AGENTS.md # TypeScript repositories/apps
+    react/AGENTS.md     # React repositories/apps
+    nextjs/AGENTS.md    # Next.js repositories/apps
+    bun/AGENTS.md       # Bun runtime/package manager repositories/apps
+    go/AGENTS.md        # Go repositories/services
 ```
 
 # Working Agreements
 - Always load `modules/common/AGENTS.md`.
+- Load `modules/typescript/AGENTS.md` when at least one signal exists: `tsconfig.json`, `tsconfig.*.json`, `*.ts`, or `*.tsx`.
+- Load `modules/react/AGENTS.md` when at least one signal exists: `package.json` with `react`, `*.jsx`, or `*.tsx`.
 - Load `modules/go/AGENTS.md` only when at least one signal exists: `go.mod`, `go.work`, `*.go`, `cmd/`, `internal/`.
 - Load `modules/nextjs/AGENTS.md` only when at least one signal exists: `next.config.js|mjs|ts`, `package.json` with `next`, `app/` containing route files, or `pages/` with Next.js conventions.
+- Load `modules/bun/AGENTS.md` when at least one Bun signal exists: `bun.lock`, `bun.lockb`, `bunfig.toml`, or `package.json` with Bun scripts/tooling.
+- If JavaScript, TypeScript, React, or Next.js signals exist, also load `modules/bun/AGENTS.md`.
 - If signals for multiple stacks exist, load all matching stack modules.
 - If no stack signal matches, keep only `modules/common/AGENTS.md` plus any local repository `AGENTS.md`.
 - Precedence order for conflicts: nearest local `AGENTS.md` in target repository, then repository root `AGENTS.md`, then `AGENTS.router.md`, then loaded modules.
