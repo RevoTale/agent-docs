@@ -14,4 +14,4 @@ This Next.js module is intentionally minimal and will be rebuilt from scratch th
 - No Next.js-specific conventions are defined yet.
 
 # Working Agreements
-- Add Next.js rules incrementally; each new rule must be concrete, testable, and scoped.
+- No Next.js-specific working agreements are defined yet.

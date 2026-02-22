@@ -14,4 +14,4 @@ This Go module is intentionally minimal and will be rebuilt from scratch through
 - No Go-specific conventions are defined yet.
 
 # Working Agreements
-- Add Go rules incrementally; each new rule must be concrete, testable, and scoped.
+- No Go-specific working agreements are defined yet.

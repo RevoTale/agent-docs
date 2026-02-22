@@ -11,7 +11,7 @@ This module is intentionally minimal and will be rebuilt from scratch through ex
 - No baseline cross-stack behaviors are defined yet.
 
 # Conventions
-- No baseline conventions are defined yet.
+- No baseline cross-stack conventions are defined yet.
 
 # Working Agreements
 - Add rules incrementally; each new rule must be concrete, testable, and scoped.
