@@ -6,6 +6,7 @@ Central source for shared AGENTS policies of [RevoTale](https://revotale.com).
 
 - `AGENTS.md`: this repository description.
 - `AGENTS.router.md`: module load rules.
+- `shared/<rule-name>.md`: reusable cross-stack rulesets referenced by stack modules.
 - `modules/common/AGENTS.md`: always-load baseline policy.
 - `modules/<stack>/AGENTS.md`: stack-specific policy modules (add new stacks here).
 - `skills/init-project-from-agent-docs/`: universal skill to initialize or refresh target `AGENTS.md`.
