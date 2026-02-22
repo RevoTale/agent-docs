@@ -1,6 +1,6 @@
 # RevoTale Agent Docs
 
-Central source for shared AGENTS policies.
+Central source for shared AGENTS policies of [RevoTale](https://revotale.com).
 
 ## Repository Layout
 
