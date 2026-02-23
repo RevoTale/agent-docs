@@ -18,15 +18,17 @@ This module defines baseline Taskfile workflow rules for repositories and applic
 - Use Taskfile for code generation, fixes, validation, and testing.
 - Enforce this convention for all nested Taskfiles:
   - `task gen`: code generation committed to VCS.
-  - `task gen:check`: verifies generation is up to date and returns non-zero when generated outputs differ.
+  - `task gen:check`: dry-run-only generation check. Must not modify files and must return non-zero when generation would change outputs.
+  - `task gen:code-diff`: runs generation and fails when a VCS/code diff check detects changes (for Git repositories: `git diff --exit-code`). Use as CI fallback when a generator has no dry-run mode.
   - `task fix`: auto-fixes issues using defined code quality tools.
   - `task validate`: runs parallel-safe tests and linters that do not mutate shared outputs.
   - `task test`: runs checks that do not fit `task validate` (for example, tests with shared mutable state).
 
-# Working Agreements
-- Keep Taskfile task naming consistent (`gen`, `gen:check`, `fix`, `validate`, `test`). The same structure goes for the nested Taskfiles.
+- Keep Taskfile task naming consistent (`gen`, `gen:check`, `gen:code-diff` when needed, `fix`, `validate`, `test`). The same structure goes for the nested Taskfiles.
 - If there are no tools to run for a task category, skip that category.
 - When both tasks exist, run `task validate` first, then `task test`.
+- Keep `task gen:check` non-mutating: only dry-run checks are allowed there.
+- Every project must provide a VCS/code-diff generation check command for CI use when codegen tools do not support dry-run (for Git repositories: `git diff --exit-code`).
 - Compose Taskfiles with reusable tasks and call them via `task:`. For example:
 This is an incorrect variant:
 ```Taskfile.yml
