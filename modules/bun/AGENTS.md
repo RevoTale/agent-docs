@@ -19,6 +19,7 @@ This module defines baseline engineering rules for Bun-based repositories and ap
 - Use `bun install` for dependency management.
 - Use `bun run` for project scripts.
 - Use `bun test` for test execution when tests are available.
+- For containerized Bun installs prefer `--backend=copyfile` to avoid hardlink issues on bind-mounted/container filesystems and [devcontainer](https://github.com/devcontainers/cli),host and bin volumes `node_modules` directory synchronization
 
 # Working Agreements
 - Bun commands must be used in local and CI workflows.

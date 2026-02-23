@@ -10,6 +10,7 @@ Module index:
   AGENTS.router.md     # routing and load conditions
   modules/
     common/AGENTS.md   # always loaded
+    taskfile/AGENTS.md # Taskfile (go-task) workflow module
     typescript/AGENTS.md # TypeScript repositories/apps
     react/AGENTS.md     # React repositories/apps
     nextjs/AGENTS.md    # Next.js repositories/apps
@@ -19,6 +20,7 @@ Module index:
 
 # Working Agreements
 - Always load `modules/common/AGENTS.md`.
+- Always load `modules/taskfile/AGENTS.md` (short key: `taskfile`, full stack name: `Taskfile (go-task)`).
 - Load `modules/typescript/AGENTS.md` when at least one signal exists: `tsconfig.json`, `tsconfig.*.json`, `*.ts`, or `*.tsx`.
 - Load `modules/react/AGENTS.md` when at least one signal exists: `package.json` with `react`, `*.jsx`, or `*.tsx`.
 - Load `modules/go/AGENTS.md` only when at least one signal exists: `go.mod`, `go.work`, `*.go`, `cmd/`, `internal/`.
@@ -26,6 +28,6 @@ Module index:
 - Load `modules/bun/AGENTS.md` when at least one Bun signal exists: `bun.lock`, `bun.lockb`, `bunfig.toml`, or `package.json` with Bun scripts/tooling.
 - If JavaScript, TypeScript, React, or Next.js signals exist, also load `modules/bun/AGENTS.md`.
 - If signals for multiple stacks exist, load all matching stack modules.
-- If no stack signal matches, keep only `modules/common/AGENTS.md` plus any local repository `AGENTS.md`.
+- If no stack signal matches, keep `modules/common/AGENTS.md` and `modules/taskfile/AGENTS.md` plus any local repository `AGENTS.md`.
 - Precedence order for conflicts: nearest local `AGENTS.md` in target repository, then repository root `AGENTS.md`, then `AGENTS.router.md`, then loaded modules.
 - Any module change must be specific, testable, and paired with an update in `AGENTS.router.md` when load conditions change.
