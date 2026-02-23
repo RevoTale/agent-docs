@@ -29,3 +29,9 @@ Current repository layout:
 - If equivalent rules are shared by multiple stack modules, extract them to `shared/<rule-name>.md`.
 - Stack modules must link extracted shared rules by relative path (for module files: `[/shared/<rule-name>.md](../../shared/<rule-name>.md)`).
 - Keep shared files concrete and tool-focused; stack modules should keep only stack-specific additions.
+- When user tells to add something/update in current docs:
+  - learn the target topic
+  - learn the current documentation
+  - learn the reccomended ways to write clean `AGENTS.md` for both: humans and agents. Be concise.
+  - learn what user actually ask for, if the target task is ambigious -> as the questions
+  - adapt the received task to fit the current documentation structrue; propose the better alternatives if there are some
