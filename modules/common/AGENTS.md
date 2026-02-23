@@ -11,7 +11,7 @@ This module defines baseline rules that apply to every repository regardless of 
 - Reuse Taskfile workflow rules for all projects: [../taskfile/AGENTS.md](../taskfile/AGENTS.md)
 
 # Conventions
-- Use Taskfile as the default interface for codegen, fix, and validation workflows across modules.
+- Use Taskfile as the default interface for codegen, fix, validation, and test workflows across modules.
 
 # Working Agreements
 - Every project should follow the Taskfile conventions in [../taskfile/AGENTS.md](../taskfile/AGENTS.md).

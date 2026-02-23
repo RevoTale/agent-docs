@@ -17,11 +17,13 @@ This module defines baseline engineering rules for Next.js repositories and appl
 
 # Conventions
 - Reuse shared conventions: [../../shared/biome-conventions.md](../../shared/biome-conventions.md)
-- Run Next.js workflows through Bun (`bun run next dev`, `bun run next build`, `bun run next start`).
+- Keep Next.js scripts executable through Bun (`bun run next dev`, `bun run next build`, `bun run next start`) because Dockerfile builds depend on them.
+- Taskfile workflows may wrap these scripts for repository-level orchestration.
+- For Next.js repositories, keep `task validate` limited to Biome checks.
 - Keep Bun lockfiles in source control.
 - Avoid plain `.js` files. Only `.tsx` and `.ts`, even for configs, if possible.
 - Use only `app` directory features.
 
 # Working Agreements
-- `bun run next build` must pass for Next.js changes before merge.
+- `task validate` and `task test` must pass for Next.js changes before merge.
 - Next.js changes must use the App Router (`app/`) and must not introduce `pages/`.

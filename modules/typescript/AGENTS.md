@@ -20,8 +20,8 @@ This module defines baseline engineering rules for TypeScript repositories and a
 - Prefer a single, universal `tsconfig.json` when practical.
 - Configure strict compiler options, including `noUncheckedIndexedAccess`.
 - Avoid plain `.js` files. Only `.tsx` and `.ts`, even for configs, if possible.
-- Run scripts and tooling through Bun.
+- Run scripts and tooling through Bun via Taskfile tasks.
 
 # Working Agreements
-- `bun run tsc --noEmit` (or equivalent typecheck task) must pass before merge.
+- `task validate` must include TypeScript typechecking (`bun run tsc --noEmit` or equivalent) and pass before merge.
 - Keep TypeScript configuration centralized unless multiple configs are required by tooling constraints.

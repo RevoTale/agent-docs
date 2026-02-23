@@ -18,8 +18,8 @@ This module defines baseline engineering rules for Bun-based repositories and ap
 - Reuse shared conventions: [../../shared/biome-conventions.md](../../shared/biome-conventions.md)
 - Use `bun install` for dependency management.
 - Use `bun run` for project scripts.
-- Use `bun test` for test execution when tests are available.
+- Route test execution through Taskfile (`task validate` and `task test`); Taskfile tasks may invoke `bun test`.
 - For containerized installs, prefer `bun install --backend=copyfile` to avoid hardlink issues on bind mounts and Dev Containers host/bin volume synchronization for `node_modules`.
 
 # Working Agreements
-- Bun commands must be used in local and CI workflows.
+- Bun commands must be orchestrated through Taskfile tasks in local and CI workflows.

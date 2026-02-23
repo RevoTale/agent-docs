@@ -15,9 +15,9 @@ This module defines baseline engineering rules for Go repositories and services.
 
 # Conventions
 - Configure the `lll` linter in golangci-lint with line length set to 120.
-- Run golangci-lint against all Go packages in the repository.
+- Run golangci-lint against all Go packages through Taskfile tasks.
 
 # Working Agreements
-- `golangci-lint run` must pass for Go changes before merge.
-- `go test ./...` must pass for Go changes before merge.
-- Fix and validate the code with `gofmt` before merging: the official, opinionated code formatting tool for the Go programming language
+- `task validate` must run `golangci-lint run` and pass for Go changes before merge.
+- `task test` must run `go test ./...` (or a scoped equivalent) and pass for Go changes before merge.
+- `task fix` must run `gofmt` before merge: the official, opinionated code formatting tool for the Go programming language.

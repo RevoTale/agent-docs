@@ -9,12 +9,13 @@ This module defines baseline Taskfile workflow rules for repositories and applic
 ```
 
 # Core Behaviors & Patterns
-- Use Taskfile as the primary workflow entrypoint for code generation, fixes, and validation.
+- Use Taskfile as the primary workflow entrypoint for code generation, fixes, validation, and testing.
 - Running Taskfile commands at repository root applies to all submodules; running inside a submodule applies only to local scope.
 - Prefer to define workflow commands in `Taskfile.yml` instead of technology-specific files like `package.json` or `composer.json`. Keep commands in technology-specific files only when required by those tools.
+- Execute tests via Taskfile tasks instead of calling stack-specific test commands directly.
 
 # Conventions
-- Use Taskfile for code generation, fixes, and validation.
+- Use Taskfile for code generation, fixes, validation, and testing.
 - Enforce this convention for all nested Taskfiles:
   - `task gen`: code generation committed to VCS.
   - `task gen:check`: verifies generation is up to date and returns non-zero when generated outputs differ.
@@ -25,6 +26,7 @@ This module defines baseline Taskfile workflow rules for repositories and applic
 # Working Agreements
 - Keep Taskfile task naming consistent (`gen`, `gen:check`, `fix`, `validate`, `test`). The same structure goes for the nested Taskfiles.
 - If there are no tools to run for a task category, skip that category.
+- When both tasks exist, run `task validate` first, then `task test`.
 - Compose Taskfiles with reusable tasks and call them via `task:`. For example:
 This is an incorrect variant:
 ```Taskfile.yml
