@@ -13,7 +13,7 @@ Current repository layout:
   skills/
     init-project-from-agent-docs/
       SKILL.md         # init skill
-  modules/ # directory containg stack-specific guidance
+  modules/ # directory containing stack-specific guidance
 
 ```
 
@@ -22,7 +22,7 @@ Current repository layout:
 - Routing logic is maintained in `AGENTS.router.md`.
 - Stack-specific guidance is maintained in `modules/*/AGENTS.md`.
 - `AGENTS.router.md` must include references to all stack modules.
-- Root `AGENTS.md` should not update itself when new stack or shared rules are being added. Keep it unversal and describe the general design.
+- Root `AGENTS.md` should not update itself when new stack or shared rules are being added. Keep it universal and describe the general design.
 - Changes to module paths or routing signals must update `AGENTS.router.md` in the same change.
 - When adding a new stack, update `AGENTS.router.md` with both the short stack key and full stack name.
 - `AGENTS.router.md` must instruct agents to load only project-specific stack modules.

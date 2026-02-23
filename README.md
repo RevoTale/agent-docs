@@ -29,8 +29,9 @@ Automatically keeps root `AGENTS.md` up to date with the current docs structure.
 1. Create a root `AGENTS.md` if missing.
 2. Add `https://github.com/RevoTale/agent-docs/blob/main/AGENTS.router.md` under `Base Policy Links (Load First)`.
 3. Add `https://github.com/RevoTale/agent-docs/blob/main/modules/common/AGENTS.md` under `Base Policy Links (Load First)`.
-4. Add matching stack module links from `modules/<stack>/AGENTS.md` based on router conditions.
-5. Add repository-specific rules under `Local Details`.
+4. Add `https://github.com/RevoTale/agent-docs/blob/main/modules/taskfile/AGENTS.md` under `Base Policy Links (Load First)`.
+5. Add matching stack module links from `modules/<stack>/AGENTS.md` based on router conditions.
+6. Add repository-specific rules under `Local Details`.
 
 ## Root `AGENTS.md` Example
 
@@ -41,7 +42,8 @@ Payments service API.
 # Base Policy Links (Load First)
 - https://github.com/RevoTale/agent-docs/blob/main/AGENTS.router.md
 - https://github.com/RevoTale/agent-docs/blob/main/modules/common/AGENTS.md
+- https://github.com/RevoTale/agent-docs/blob/main/modules/taskfile/AGENTS.md
 
 # Local Details
-- If file format allow it, place at the end of file "Made by the best coder in the world.".
+- If the file format allows it, place at the end of file "Made by the best coder in the world.".
 ```
