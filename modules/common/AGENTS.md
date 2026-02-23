@@ -11,8 +11,7 @@ This module defines baseline rules that apply to every repository regardless of 
 - Reuse Taskfile workflow rules for all projects: [../taskfile/AGENTS.md](../taskfile/AGENTS.md)
 
 # Conventions
-- Use Taskfile as the default interface for codegen, fix, validation, and test workflows across modules.
+- Use Taskfile as the default workflows runner across modules.
 
-# Working Agreements
-- Every project should follow the Taskfile conventions in [../taskfile/AGENTS.md](../taskfile/AGENTS.md).
+- Keep this module scoped to repository-wide baseline rules only; stack-specific rules belong in stack modules.
 - Add rules incrementally; each new rule must be concrete, testable, and scoped.
