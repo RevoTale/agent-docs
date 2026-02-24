@@ -43,8 +43,7 @@ The format is:
   - JavaScript, TypeScript, React, or Next.js signals exist.
 
 # Change management:
-Any module change must be specific, testable, and paired with an update in `AGENTS.router.md` when load conditions change.
-
+Any module change must be specific, testable, and paired with an update in `doc.md` when load conditions change.
 
 # Stack matching behavior:
 If signals for multiple stacks exist, load all matching stack modules.
