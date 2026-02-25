@@ -7,13 +7,13 @@ Use this table as the single source of truth for module routing.
 
 | key | full_name | module_path | load_when |
 | --- | --- | --- | --- |
-| common | Common baseline rules | modules/common/AGENTS.md | always |
-| taskfile | Taskfile (go-task) workflows | modules/taskfile/AGENTS.md | always |
-| typescript | TypeScript | modules/typescript/AGENTS.md | `tsconfig.json`, `tsconfig.*.json`, `*.ts`, or `*.tsx` exist |
-| react | React | modules/react/AGENTS.md | `package.json` includes `react`, or `*.jsx` / `*.tsx` files exist |
-| nextjs | Next.js | modules/nextjs/AGENTS.md | `next.config.js|mjs|ts`, `package.json` includes `next`, or `app/` route files exist |
-| bun | Bun runtime/package manager | modules/bun/AGENTS.md | `bun.lock` / `bun.lockb` / `bunfig.toml` exist, or `package.json` uses Bun tooling |
-| go | Go | modules/go/AGENTS.md | `go.mod`, `go.work`, `*.go`, `cmd/`, or `internal/` exist |
+| common | Common baseline rules | modules/common/doc.md | always |
+| taskfile | Taskfile (go-task) workflows | modules/taskfile/doc.md | always |
+| typescript | TypeScript | modules/typescript/doc.md | `tsconfig.json`, `tsconfig.*.json`, `*.ts`, or `*.tsx` exist |
+| react | React | modules/react/doc.md | `package.json` includes `react`, or `*.jsx` / `*.tsx` files exist |
+| nextjs | Next.js | modules/nextjs/doc.md | `next.config.js|mjs|ts`, `package.json` includes `next`, or `app/` route files exist |
+| bun | Bun runtime/package manager | modules/bun/doc.md | `bun.lock` / `bun.lockb` / `bunfig.toml` exist, or `package.json` uses Bun tooling |
+| go | Go | modules/go/doc.md | `go.mod`, `go.work`, `*.go`, `cmd/`, or `internal/` exist |
 
 # Routing Rules
 1. Load all rows where `load_when` is `always`.

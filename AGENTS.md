@@ -23,7 +23,7 @@ Current repository layout:
   skills/               # directory containing skills that helps intergating/communicating with current rules
     <skill-name>.md
   modules/              # directory containing stack-specific guidance
-    <module-name>/AGENTS.md
+    <module-name>/doc.md
 ```
 
 # Root AGENTS.md rules
@@ -42,7 +42,7 @@ Current repository layout:
 - Root `doc.md` should contain only routing/composition logic and helpers to assemble target `AGENTS.md`.
 
 ## Stack
-- Stack-specific guidance is maintained in `modules/*/AGENTS.md`.
+- Stack-specific guidance is maintained in `modules/*/doc.md`.
 - If equivalent rules are shared by multiple stack modules, extract them to `shared/<rule-name>.md`.
 - Stack modules must link extracted shared rules by relative path (for module files: `[shared/<rule-name>.md](../../shared/<rule-name>.md)`).
 - Keep shared files concrete and tool-focused; stack modules should keep only stack-specific additions.

@@ -1,20 +1,18 @@
 # Overview
 This module defines baseline Taskfile workflow rules for repositories and applications.
 
-# Folder Structure
+# Project structure
 ```text
 <repo-root>/
   AGENTS.md
   Taskfile.yml
 ```
 
-# Core Behaviors & Patterns
-- Use [Taskfile](https://github.com/go-task/task) as the primary workflow entrypoint for development-related commands. Including code generation, fixes, validation, and testing.
-- Running Taskfile commands at repository root applies to all submodules; running inside a submodule applies only to local scope: for example, nested `task validate` shoudld be included in the root `task validate`.
+# Strict rules
+- Use [Taskfile](https://github.com/go-task/task) as the primary workflow entrypoint for development-related commands, including code generation, fixes, validation, and testing.
+- Running Taskfile commands at repository root applies to all submodules; running inside a submodule applies only to local scope: for example, nested `task validate` should be included in the root `task validate`.
 - Prefer to define workflow commands in `Taskfile.yml` instead of technology-specific files like `package.json` or `composer.json`. Keep commands in technology-specific files only when required by runtime or other app-level tools.
 - Execute tests via Taskfile tasks instead of calling stack-specific test commands directly.
-
-# Conventions
 - Use Taskfile as the default workflows runner.
 - Enforce this convention for all nested Taskfiles:
   - `task gen`: code generation committed to VCS.
@@ -52,3 +50,7 @@ tasks:
     cmds:
       - task: biome:fix
 ```
+
+# Working Agreements
+- Taskfile changes must preserve the standard task interface (`gen`, `gen:check`, `gen:code-diff` when needed, `fix`, `validate`, `test`) unless the user explicitly approves a deviation.
+- Root and nested Taskfiles must remain composable so root `task` commands can orchestrate module-level workflows.

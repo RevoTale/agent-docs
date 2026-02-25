@@ -1,7 +1,7 @@
 # Overview
 This module defines baseline engineering rules for Bun-based repositories and applications.
 
-# Folder Structure
+# Project structure
 ```text
 <bun-repo-root>/
   AGENTS.md
@@ -10,12 +10,10 @@ This module defines baseline engineering rules for Bun-based repositories and ap
   biome.json
 ```
 
-# Core Behaviors & Patterns
+# Strict rules
 - Reuse shared baseline rules: [../../shared/js-biome-bun-core.md](../../shared/js-biome-bun-core.md)
-- Use Bun as the only runtime and package manager.
-
-# Conventions
 - Reuse shared conventions: [../../shared/biome-conventions.md](../../shared/biome-conventions.md)
+- Use Bun as the only runtime and package manager.
 - Use `bun install` for dependency management.
 - Use `bun run` for project scripts.
 - Route test execution through Taskfile (`task validate` and `task test`); Taskfile tasks may invoke `bun test`.

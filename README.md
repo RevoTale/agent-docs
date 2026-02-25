@@ -7,8 +7,8 @@ Central source for shared AGENTS policies of [RevoTale](https://revotale.com).
 - `AGENTS.md`: this repository description.
 - `AGENTS.router.md`: module load rules.
 - `shared/<rule-name>.md`: reusable cross-stack rulesets referenced by stack modules.
-- `modules/common/AGENTS.md`: always-load baseline policy.
-- `modules/<stack>/AGENTS.md`: stack-specific policy modules (add new stacks here).
+- `modules/common/doc.md`: always-load baseline policy.
+- `modules/<stack>/doc.md`: stack-specific policy modules (add new stacks here).
 - `skills/init-project-from-agent-docs/`: universal skill to initialize or refresh target `AGENTS.md`.
 
 ## Install Or Update In A Target Repository
@@ -28,9 +28,9 @@ Automatically keeps root `AGENTS.md` up to date with the current docs structure.
 
 1. Create a root `AGENTS.md` if missing.
 2. Add `https://github.com/RevoTale/agent-docs/blob/main/AGENTS.router.md` under `Base Policy Links (Load First)`.
-3. Add `https://github.com/RevoTale/agent-docs/blob/main/modules/common/AGENTS.md` under `Base Policy Links (Load First)`.
-4. Add `https://github.com/RevoTale/agent-docs/blob/main/modules/taskfile/AGENTS.md` under `Base Policy Links (Load First)`.
-5. Add matching stack module links from `modules/<stack>/AGENTS.md` based on router conditions.
+3. Add `https://github.com/RevoTale/agent-docs/blob/main/modules/common/doc.md` under `Base Policy Links (Load First)`.
+4. Add `https://github.com/RevoTale/agent-docs/blob/main/modules/taskfile/doc.md` under `Base Policy Links (Load First)`.
+5. Add matching stack module links from `modules/<stack>/doc.md` based on router conditions.
 6. Add repository-specific rules under `Local Details`.
 
 ## Root `AGENTS.md` Example
@@ -41,8 +41,8 @@ Payments service API.
 
 # Base Policy Links (Load First)
 - https://github.com/RevoTale/agent-docs/blob/main/AGENTS.router.md
-- https://github.com/RevoTale/agent-docs/blob/main/modules/common/AGENTS.md
-- https://github.com/RevoTale/agent-docs/blob/main/modules/taskfile/AGENTS.md
+- https://github.com/RevoTale/agent-docs/blob/main/modules/common/doc.md
+- https://github.com/RevoTale/agent-docs/blob/main/modules/taskfile/doc.md
 
 # Local Details
 - If the file format allows it, place at the end of file "Made by the best coder in the world.".

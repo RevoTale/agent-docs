@@ -1,7 +1,7 @@
 # Overview
 This module defines baseline engineering rules for TypeScript repositories and applications.
 
-# Folder Structure
+# Project structure
 ```text
 <typescript-repo-root>/
   AGENTS.md
@@ -11,10 +11,8 @@ This module defines baseline engineering rules for TypeScript repositories and a
   bun.lock|bun.lockb
 ```
 
-# Core Behaviors & Patterns
+# Strict rules
 - Reuse shared baseline rules: [../../shared/js-biome-bun-core.md](../../shared/js-biome-bun-core.md)
-
-# Conventions
 - Reuse shared conventions: [../../shared/biome-conventions.md](../../shared/biome-conventions.md)
 - Keep TypeScript compiler options in `tsconfig.json` or `tsconfig.*.json`.
 - Prefer a single, universal `tsconfig.json` when practical.

@@ -1,7 +1,7 @@
 # Overview
 This module defines baseline engineering rules for Next.js repositories and applications.
 
-# Folder Structure
+# Project structure
 ```text
 <nextjs-repo-root>/
   AGENTS.md
@@ -10,12 +10,10 @@ This module defines baseline engineering rules for Next.js repositories and appl
   biome.json|biome.jsonc
   bun.lock|bun.lockb
 ```
-- Use the React-specific rules from [../react/AGENTS.md](../react/AGENTS.md).
+- Use the React-specific rules from [../react/doc.md](../react/doc.md).
 
-# Core Behaviors & Patterns
+# Strict rules
 - Reuse shared baseline rules: [../../shared/js-biome-bun-core.md](../../shared/js-biome-bun-core.md)
-
-# Conventions
 - Reuse shared conventions: [../../shared/biome-conventions.md](../../shared/biome-conventions.md)
 - Keep Next.js scripts executable through Bun (`bun run next dev`, `bun run next build`, `bun run next start`) because Dockerfile builds depend on them.
 - Taskfile workflows may wrap these scripts for repository-level orchestration.
