@@ -1,15 +1,15 @@
 # Overview
 This repository is the organization-wide AGENTS policy source.
-It stores the strict to rules for the projects and defines strict policies enforcing good architecture pattern including:
-- technologies which to choose
+It stores strict project rules and defines architecture policy including:
+- technology choices
 - code style
 - code quality tools
 - naming conventions
 - directory structure
-- code pattern
+- code patterns
 - custom strict rules
 
-Based on the target project, techonology stack should be combined into single `AGENTS.md` at the root of target project via appropriate `SKILL`. It assembles all project-specific stack modules keeping all the convention and rules
+Based on the target project, stack modules are combined into a single root `AGENTS.md` via the appropriate skill. It assembles project-specific rules while preserving shared conventions.
 
 # Folder Structure
 Current repository layout:
@@ -23,7 +23,7 @@ Current repository layout:
   skills/               # directory containing skills that helps intergating/communicating with current rules
     <skill-name>.md
   modules/              # directory containing stack-specific guidance
-    <module-name>.md
+    <module-name>/AGENTS.md
 ```
 
 # Root AGENTS.md rules
@@ -34,11 +34,12 @@ Current repository layout:
 
 ## Root doc.md
 - Routing logic is maintained in `doc.md`.
-- `doc.md` must include references to all stack modules.
-- `doc.md` must instruct agents to load only project-specific stack modules.
+- `doc.md` must include references to all baseline and stack modules.
+- `doc.md` must provide a canonical table with short stack key, full stack name, module path, and `load_when`.
+- `doc.md` must instruct agents to always load baseline modules and load project-specific stacks by `load_when` signals.
 - Changes to module paths or routing signals must update `doc.md` in the same change.
 - When adding a new stack, update `doc.md` with both the short stack key and full stack name.
-- Root `doc.md` should contain only logic only a logic and helpers to assemble the target `AGENTS.md`.
+- Root `doc.md` should contain only routing/composition logic and helpers to assemble target `AGENTS.md`.
 
 ## Stack
 - Stack-specific guidance is maintained in `modules/*/AGENTS.md`.
@@ -47,12 +48,12 @@ Current repository layout:
 - Keep shared files concrete and tool-focused; stack modules should keep only stack-specific additions.
 
 ## Rules combination
-All the rules in this project should be combined in the way, the target AGENT can merge them easily into a single `AGENTS.md` via one of the techniques defined in the `doc.md`.
+Rules in this project must be combined so a target agent can merge them into a single `AGENTS.md` using the contract defined in `doc.md`.
 
 # Working Agreements
 
-When user tells to add something/update in current docs:
+When user tells to add or update current docs:
   1. learn the target topic
   2. learn the current documentation
-  3. learn the reccomended ways to write clean `AGENTS.md` for both: humans and agents. Be concise.
-  4. learn what user actually ask for. If the target task is ambigious -> ask the questions -> adapt the received information about task to fit the current documentation structrue; propose the better alternatives if there are some
+  3. learn the recommended ways to write clean `AGENTS.md` for both humans and agents. Be concise.
+  4. learn what user actually asked for. If the task is ambiguous, ask questions, adapt to current documentation structure, and propose better alternatives when useful.

@@ -1,72 +1,41 @@
 # Overview
-This is the universal AGENTS router. It selects stack modules by repository signals so agent can find them and combine to compose the own `AGENTS.md` speific to the use project.
+This file is the universal AGENTS router and composition contract.
+It defines which module files to load and how to merge them into a target repository `AGENTS.md`.
 
-# Folder Structure
-Module index:
+# Canonical Module Registry
+Use this table as the single source of truth for module routing.
 
-```text
-<repo-root>/
-  AGENTS.md            # stable bootstrap entrypoint
-  doc.md            # instructions on composing the target prpject AGENTS.md
-  modules/
-    common/doc.md   # always loaded
-    taskfile/doc.md # Taskfile (go-task) workflow module
-    typescript/doc.md # TypeScript repositories/apps
-    react/doc.md     # React repositories/apps
-    nextjs/doc.md    # Next.js repositories/apps
-    bun/doc.md       # Bun runtime/package manager repositories/apps
-    go/doc.md        # Go repositories/services
-```
+| key | full_name | module_path | load_when |
+| --- | --- | --- | --- |
+| common | Common baseline rules | modules/common/AGENTS.md | always |
+| taskfile | Taskfile (go-task) workflows | modules/taskfile/AGENTS.md | always |
+| typescript | TypeScript | modules/typescript/AGENTS.md | `tsconfig.json`, `tsconfig.*.json`, `*.ts`, or `*.tsx` exist |
+| react | React | modules/react/AGENTS.md | `package.json` includes `react`, or `*.jsx` / `*.tsx` files exist |
+| nextjs | Next.js | modules/nextjs/AGENTS.md | `next.config.js|mjs|ts`, `package.json` includes `next`, or `app/` route files exist |
+| bun | Bun runtime/package manager | modules/bun/AGENTS.md | `bun.lock` / `bun.lockb` / `bunfig.toml` exist, or `package.json` uses Bun tooling |
+| go | Go | modules/go/AGENTS.md | `go.mod`, `go.work`, `*.go`, `cmd/`, or `internal/` exist |
 
-# Examples of common stack-specific signals
-Here are the stacks defined and some common signals on when to use them.
-
-The format is:
-```
-- <technology stack>
-  - Common signal 1
-  - Common signal 2
-```
-
-- `modules/taskfile/doc.md`:
-  - use always.
-- `modules/typescript/doc.md`:
-  - Any files `tsconfig.json`, `tsconfig.*.json`, `*.ts`, or `*.tsx`
-- `modules/react/doc.md`: 
-  - Files like `package.json` with `react` or `*.jsx`, or `*.tsx`.
-- `modules/go/doc.md`:
-  - Any files like `go.mod`, `go.work`, `*.go`, `cmd/`, `internal/`.
-- `modules/nextjs/doc.md`:
-  - Files like `next.config.js|mjs|ts`, `package.json` with `next`, or `app/` containing route files.
-- `modules/bun/doc.md`:
-  - Files like `bun.lock`, `bun.lockb`, `bunfig.toml`, or `package.json` with Bun scripts/tooling.
-  - JavaScript, TypeScript, React, or Next.js signals exist.
-
-# Change management:
-Any module change must be specific, testable, and paired with an update in `doc.md` when load conditions change.
-
-# Stack matching behavior:
-If signals for multiple stacks exist, load all matching stack modules.
-
+# Routing Rules
+1. Load all rows where `load_when` is `always`.
+2. Evaluate all other rows and load a module when any signal in its `load_when` condition matches.
+3. If multiple modules match, load all matched modules.
+4. Any module add/remove/rename or signal change must update this table in the same change.
 
 # Instructions for combining the rules
-
-Each module strictly defines the following sections:
+Each module must define the following sections:
 - Overview
-- Strict rules
 - Project structure
+- Strict rules
 - Working Agreements
 
-## Rules of the sections combining into a single AGENTS.md
-We have a strict rules how to combine those section. 
-Following merge rules should be followed when composing the stack specific modules into single `AGENTS.md`. They are described by sections, starting with the `###`.
+## Rules of sections combining into a single AGENTS.md
+Follow these merge rules by section.
 
-
-### Overview 
-Modules description. Needed for better understanding of the module specifics by the agent.
+### Overview
+Keep module descriptions for context and stack intent. Merge without removing relevant stack context.
 
 ### Project structure
-Here is an example format of the project strcture section.
+Use this format:
 
 ```text
 <go-repo-root>/
@@ -74,20 +43,21 @@ Here is an example format of the project strcture section.
  |.golangci.yml|.golangci.yaml|.golangci.toml
 ```
 
-- `OR` condition is marked as `|`
-- Variable naming of files/folder are defined via `<variadic-description>` where `variadic-description` is the any short text that describes the naming. 
-- Folder name are ending via `/` symbol and the nesting level is marked via the space count used. Tabulation ending should be marked as a `|` symbol. For example, the 2-level nested folder will marked as `  |`. No single `|` can be used beacuse root folders are marked without any spaces and symbold.
+- `OR` condition is marked as `|`.
+- Variable naming is defined via `<variadic-description>`.
+- Folder names end with `/`.
+- Keep indentation stable and represent structure consistently.
 
-When merging two folder structures, merge them using rules above.
+When merging two project structures, produce a union of paths and preserve `OR` groups.
 
-#### Example of mering two Project structures
-##### Strcture example 1
+#### Example of merging two Project structures
+##### Structure example 1
 ```text
 <go-repo-root>/
  |AGENTS.md
  |.golangci.yml|.golangci.yaml|.golangci.toml
 ```
-##### Strcture example 2
+##### Structure example 2
 ```text
 <bun-repo-root>/
  |AGENTS.md
@@ -95,7 +65,7 @@ When merging two folder structures, merge them using rules above.
  |biome.json
  |bun.lock|bun.lockb
 ```
-#####  Merged strcture examples 1+2
+##### Merged structure examples 1+2
 ```text
 <bun-go-repo-root>/
  |AGENTS.md
@@ -106,8 +76,19 @@ When merging two folder structures, merge them using rules above.
 ```
 
 ### Strict rules
-Strict rules should be used as is. Just add one to another. In case of conflicting rules inteview the user on how better to resolve the conflict.
+1. Default behavior is additive merge.
+2. Stack modules have highest priority.
+3. Compatible requirements must be merged together.
+Example: if one rule requires `task validate` to include `tsc --noEmit` and another requires `golangci-lint`, include both commands.
+4. If strict rules still conflict (`must` vs `must not`) and cannot be merged, the more specific stack wins.
+Example: `nextjs` overrides `react` on overlapping frontend rules.
+5. If conflicting stacks are equally specific, switch to interview mode for user resolution.
+6. Handle these cases in interview mode with the user:
+- identical duplicated rules that could be deduplicated
+- truly incompatible rules (`must` vs `must not` on the same behavior)
 
 ### Working Agreements
-
-This part must be agreed upon with the user. First, merge the Working Agreement from the existing modules and propose the final version to the user. The user must give a clear response of “Accept” or indicate what they are not satisfied with and provide their own edits. After that, propose a new version considering their suggestions. Continue until you reach consensus and they respond “Accept” to the final proposed version.
+This part must be agreed with the user.
+First merge Working Agreements from loaded modules and propose the result.
+The user must give a clear response of `Accept` or request edits.
+Iterate until consensus and finalize only after explicit `Accept`.
