@@ -11,13 +11,15 @@ This module defines baseline engineering rules for Bun-based repositories and ap
 ```
 
 # Strict rules
-- Reuse shared baseline rules: [../../shared/js-biome-bun-core.md](../../shared/js-biome-bun-core.md)
-- Reuse shared conventions: [../../shared/biome-conventions.md](../../shared/biome-conventions.md)
-- Use Bun as the only runtime and package manager.
-- Use `bun install` for dependency management.
-- Use `bun run` for project scripts.
-- Route test execution through Taskfile (`task validate` and `task test`); Taskfile tasks may invoke `bun test`.
-- For containerized installs, prefer `bun install --backend=copyfile` to avoid hardlink issues on bind mounts and Dev Containers host/bin volume synchronization for `node_modules`.
+- MUST reuse shared baseline rules: [../../shared/js-biome-bun-core.md](../../shared/js-biome-bun-core.md).
+- MUST reuse shared conventions: [../../shared/biome-conventions.md](../../shared/biome-conventions.md).
+- MUST use Bun as the only runtime and package manager.
+- MUST use `bun install` for dependency management.
+- MUST use `bun run` for project scripts.
+- MUST route test execution through Taskfile (`task validate` and `task test`); Taskfile tasks MAY invoke `bun test`.
+- SHOULD prefer `bun install --backend=copyfile` for containerized installs to avoid hardlink issues.
+- MUST orchestrate Bun commands through Taskfile tasks in local and CI workflows.
 
 # Working Agreements
-- Bun commands must be orchestrated through Taskfile tasks in local and CI workflows.
+- MUST follow root interaction protocol from [../../AGENTS.md](../../AGENTS.md) before finalizing policy changes.
+- MUST ask for explicit `Accept` before allowing non-Bun runtime or package-manager exceptions.

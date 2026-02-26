@@ -2,14 +2,19 @@
 
 Central source for shared AGENTS policies of [RevoTale](https://revotale.com).
 
+## Source of Truth
+
+- `AGENTS.md` and `doc.md` are the only policy sources of truth.
+- `README.md` is an informative mirror and must stay aligned with those files.
+
 ## Repository Layout
 
-- `AGENTS.md`: this repository description.
-- `AGENTS.router.md`: module load rules.
-- `shared/<rule-name>.md`: reusable cross-stack rulesets referenced by stack modules.
-- `modules/common/doc.md`: always-load baseline policy.
-- `modules/<stack>/doc.md`: stack-specific policy modules (add new stacks here).
-- `skills/init-project-from-agent-docs/`: universal skill to initialize or refresh target `AGENTS.md`.
+- `AGENTS.md`: repository-level policy contract.
+- `doc.md`: canonical module registry, routing logic, and merge contract.
+- `shared/<rule-name>.md`: reusable cross-stack rulesets referenced by modules.
+- `modules/common/doc.md`: always-loaded baseline module.
+- `modules/<stack>/doc.md`: stack-specific modules.
+- `skills/init-project-from-agent-docs/`: skill to initialize or refresh target `AGENTS.md`.
 
 ## Install Or Update In A Target Repository
 
@@ -18,16 +23,14 @@ You can apply `agent-docs` in two ways: use the skill for automated create/updat
 ### Use The Skill
 
 Skill path: `skills/init-project-from-agent-docs/SKILL.md`
-#### Purpose
-Automatically keeps root `AGENTS.md` up to date with the current docs structure.
- 
-#### Example request
+
+Example request:
 `Use https://github.com/RevoTale/agent-docs/skills/init-project-from-agent-docs skill to refresh AGENTS.md for this repository.`
 
 ### Update Manually
 
 1. Create a root `AGENTS.md` if missing.
-2. Add `https://github.com/RevoTale/agent-docs/blob/main/AGENTS.router.md` under `Base Policy Links (Load First)`.
+2. Add `https://github.com/RevoTale/agent-docs/blob/main/doc.md` under `Base Policy Links (Load First)`.
 3. Add `https://github.com/RevoTale/agent-docs/blob/main/modules/common/doc.md` under `Base Policy Links (Load First)`.
 4. Add `https://github.com/RevoTale/agent-docs/blob/main/modules/taskfile/doc.md` under `Base Policy Links (Load First)`.
 5. Add matching stack module links from `modules/<stack>/doc.md` based on router conditions.
@@ -40,10 +43,10 @@ Automatically keeps root `AGENTS.md` up to date with the current docs structure.
 Payments service API.
 
 # Base Policy Links (Load First)
-- https://github.com/RevoTale/agent-docs/blob/main/AGENTS.router.md
+- https://github.com/RevoTale/agent-docs/blob/main/doc.md
 - https://github.com/RevoTale/agent-docs/blob/main/modules/common/doc.md
 - https://github.com/RevoTale/agent-docs/blob/main/modules/taskfile/doc.md
 
 # Local Details
-- If the file format allows it, place at the end of file "Made by the best coder in the world.".
+- Add repository-specific constraints and local working agreements.
 ```

@@ -8,11 +8,13 @@ This module defines baseline rules that apply to every repository regardless of 
 ```
 
 # Strict rules
-- Reuse Taskfile workflow rules for all projects: [../taskfile/doc.md](../taskfile/doc.md)
-- Use Taskfile as the default workflows runner across modules.
-- Keep this module scoped to repository-wide baseline rules only; stack-specific rules belong in stack modules.
-- Add rules incrementally; each new rule must be concrete, testable, and scoped.
+- MUST reuse Taskfile workflow rules for all projects: [../taskfile/doc.md](../taskfile/doc.md).
+- MUST use Taskfile as the default workflow runner across modules.
+- MUST keep this module scoped to repository-wide baseline rules only; stack-specific rules belong in stack modules.
+- MUST require `task validate` to pass before merge.
+- MUST require `task test` to pass when the project defines `task test`.
+- SHOULD add rules incrementally, and each new rule SHOULD be concrete, testable, and scoped.
 
 # Working Agreements
-- Apply this module to every target repository.
-- Keep this module free of stack-specific constraints.
+- MUST follow root interaction protocol from [../../AGENTS.md](../../AGENTS.md) before finalizing policy changes.
+- MUST ask user to move stack-specific requests into the matching stack module instead of common.

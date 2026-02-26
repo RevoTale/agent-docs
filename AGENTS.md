@@ -1,6 +1,6 @@
 # Overview
 This repository is the organization-wide AGENTS policy source.
-It stores strict project rules and defines architecture policy including:
+It stores strict project rules that define architecture policy including:
 - technology choices
 - code style
 - code quality tools
@@ -18,17 +18,17 @@ Current repository layout:
 <repo-root>/
   AGENTS.md             # repository description (this file)
   doc.md                # module routing and load conditions
-  shared/               # reusable cross-stack rulesets. extracted shared rules
+  shared/               # reusable cross-stack rulesets
     <rule-name>.md
-  skills/               # directory containing skills that helps intergating/communicating with current rules
+  skills/               # skills used to integrate with these policies
     <skill-name>.md
-  modules/              # directory containing stack-specific guidance
+  modules/              # stack-specific guidance
     <module-name>/doc.md
 ```
 
 # Root AGENTS.md rules
 - `AGENTS.md` documents this repository only and does not define downstream project rules directly.
-- Root `AGENTS.md` should not update itself when new stack or shared rules are being added. Keep it universal and describe the general design and rules to follow only for the current project.
+- Root `AGENTS.md` should not update itself when new stack or shared rules are added. Keep it universal and focused on repository-level design.
 
 # Instructions
 
@@ -37,6 +37,7 @@ Current repository layout:
 - `doc.md` must include references to all baseline and stack modules.
 - `doc.md` must provide a canonical table with short stack key, full stack name, module path, and `load_when`.
 - `doc.md` must instruct agents to always load baseline modules and load project-specific stacks by `load_when` signals.
+- `doc.md` must define section semantics: `Strict rules` for technical constraints, and `Working Agreements` for user-agent interaction protocol.
 - Changes to module paths or routing signals must update `doc.md` in the same change.
 - When adding a new stack, update `doc.md` with both the short stack key and full stack name.
 - Root `doc.md` should contain only routing/composition logic and helpers to assemble target `AGENTS.md`.
@@ -51,9 +52,7 @@ Current repository layout:
 Rules in this project must be combined so a target agent can merge them into a single `AGENTS.md` using the contract defined in `doc.md`.
 
 # Working Agreements
-
-When user tells to add or update current docs:
-  1. learn the target topic
-  2. learn the current documentation
-  3. learn the recommended ways to write clean `AGENTS.md` for both humans and agents. Be concise.
-  4. learn what user actually asked for. If the task is ambiguous, ask questions, adapt to current documentation structure, and propose better alternatives when useful.
+- MUST ask interview questions when policy intent or requested changes are ambiguous.
+- MUST wait for explicit `Accept` before finalizing any policy text change.
+- MUST document user-approved technical exceptions in the relevant `Strict rules` section.
+- MUST keep `Working Agreements` interaction-only; technical commands, checks, and invariants MUST be defined in `Strict rules`.

@@ -12,14 +12,17 @@ This module defines baseline engineering rules for React repositories and applic
 ```
 
 # Strict rules
-- Reuse shared baseline rules: [../../shared/js-biome-bun-core.md](../../shared/js-biome-bun-core.md)
-- Reuse shared conventions: [../../shared/biome-conventions.md](../../shared/biome-conventions.md)
-- Avoid plain `.js` files. Only `.tsx` and `.ts`, even for configs, if possible.
-- Run React build, test, and dev workflows through Bun.
-- Define components using functional component patterns.
-- Prefer one file per component.
-- Keep Bun lockfiles in source control.
+- MUST reuse shared baseline rules: [../../shared/js-biome-bun-core.md](../../shared/js-biome-bun-core.md).
+- MUST reuse shared conventions: [../../shared/biome-conventions.md](../../shared/biome-conventions.md).
+- MUST avoid plain `.js` files and use `.ts` / `.tsx` instead, including configs when possible.
+- MUST run React build, test, and development workflows through Bun.
+- SHOULD define components using functional component patterns.
+- SHOULD prefer one file per component.
+- MUST keep Bun lockfiles in source control.
+- MUST ensure React changes pass `task validate` before merge.
+- MUST ensure React changes pass `task test` when the task exists.
+- SHOULD colocate component-specific helpers with their component when helpers are not shared.
 
 # Working Agreements
-- React changes must pass repository validation or test tasks before merge.
-- Keep component files focused and colocate component-specific helpers when practical.
+- MUST follow root interaction protocol from [../../AGENTS.md](../../AGENTS.md) before finalizing policy changes.
+- MUST present options and require `Accept` when changing component architecture conventions.

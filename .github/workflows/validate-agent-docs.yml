@@ -1,0 +1,23 @@
+name: Validate Agent Docs
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate-agent-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.x"
+
+      - name: Test validator
+        run: go test ./scripts/validate-agent-docs.go ./scripts/validate-agent-docs_test.go
+
+      - name: Validate policy docs
+        run: go run ./scripts/validate-agent-docs.go

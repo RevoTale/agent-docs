@@ -22,11 +22,15 @@ Use this table as the single source of truth for module routing.
 4. Any module add/remove/rename or signal change must update this table in the same change.
 
 # Instructions for combining the rules
-Each module must define the following sections:
+Each module must define the following sections in this exact order:
 - Overview
 - Project structure
 - Strict rules
 - Working Agreements
+
+Section semantics:
+- `Strict rules` MUST contain technical requirements, commands, checks, and invariants.
+- `Working Agreements` MUST describe user-agent interaction protocol only and MUST NOT include technical command/check constraints.
 
 ## Rules of sections combining into a single AGENTS.md
 Follow these merge rules by section.
@@ -76,19 +80,25 @@ When merging two project structures, produce a union of paths and preserve `OR` 
 ```
 
 ### Strict rules
-1. Default behavior is additive merge.
-2. Stack modules have highest priority.
-3. Compatible requirements must be merged together.
-Example: if one rule requires `task validate` to include `tsc --noEmit` and another requires `golangci-lint`, include both commands.
-4. If strict rules still conflict (`must` vs `must not`) and cannot be merged, the more specific stack wins.
-Example: `nextjs` overrides `react` on overlapping frontend rules.
-5. If conflicting stacks are equally specific, switch to interview mode for user resolution.
-6. Handle these cases in interview mode with the user:
-- identical duplicated rules that could be deduplicated
-- truly incompatible rules (`must` vs `must not` on the same behavior)
+- MUST merge compatible requirements additively.
+- MUST treat stack modules as higher priority than baseline modules when strict rules conflict.
+- MUST let the more specific stack win when strict rules are incompatible and cannot be merged.
+- MUST switch to interview mode when conflicting stacks are equally specific.
+- MUST use interview mode to decide whether identical duplicated rules should be deduplicated.
+- MUST use interview mode for truly incompatible rules (`must` vs `must not` on the same behavior).
+- MUST document user-approved technical exceptions directly in `Strict rules`.
 
 ### Working Agreements
-This part must be agreed with the user.
-First merge Working Agreements from loaded modules and propose the result.
-The user must give a clear response of `Accept` or request edits.
-Iterate until consensus and finalize only after explicit `Accept`.
+- MUST propose merged `Working Agreements` to the user before finalizing.
+- MUST wait for explicit `Accept` before finalizing policy text.
+- MUST iterate until consensus and finalize only after explicit `Accept`.
+
+# Enforcement
+## Checklist
+- MUST update the canonical module registry whenever module paths or load signals change.
+- MUST keep module section order and names exactly as specified.
+- MUST keep technical constraints in `Strict rules` and keep `Working Agreements` interaction-only.
+- MUST run `go run ./scripts/validate-agent-docs.go` before merge.
+
+## CI Validation
+- MUST keep `.github/workflows/validate-agent-docs.yml` active so policy validation runs on pushes and pull requests.
