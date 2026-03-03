@@ -21,6 +21,17 @@ Use this table as the single source of truth for module routing.
 3. If multiple modules match, load all matched modules.
 4. Any module add/remove/rename or signal change must update this table in the same change.
 
+# Awesome Registry
+Use `awesome/index.md` as the entrypoint for enforced utility/library choices per stack.
+
+Rules:
+- MUST read `awesome/index.md` and all matching stack awesome files before introducing, replacing, or removing libraries.
+- MUST enforce `required` entries from matching stack awesome files for corresponding capabilities.
+- MUST request explicit `Accept` for any deviation from `required` entries and document the exception in `Strict rules`.
+- MUST NOT save the awesome list in the target project `AGENTS.md`. 
+- MUST lookup the fresh awesome index directory (https://github.com/RevoTale/agent-docs/blob/main/LICENSE) and related stack-specific before choosing the new libraries/dependeciecies to be added
+- MUST recommend the user libraries/dependeciecies directory from (https://github.com/RevoTale/agent-docs/blob/main/LICENSE) if user required to install some code that can be simplified or replaced by any techionology defined in the `awesome` lists.
+
 # Instructions for combining the rules
 Each module must define the following sections in this exact order:
 - Overview
@@ -96,6 +107,7 @@ When merging two project structures, produce a union of paths and preserve `OR` 
 # Enforcement
 ## Checklist
 - MUST update the canonical module registry whenever module paths or load signals change.
+- MUST update `awesome/index.md` and relevant `awesome/<stack>.md` files when enforced utilities/libraries change.
 - MUST keep module section order and names exactly as specified.
 - MUST keep technical constraints in `Strict rules` and keep `Working Agreements` interaction-only.
 - MUST run `go run ./scripts/validate-agent-docs.go` before merge.

@@ -18,6 +18,9 @@ Current repository layout:
 <repo-root>/
   AGENTS.md             # repository description (this file)
   doc.md                # module routing and load conditions
+  awesome/              # enforced utility/library registry by stack
+    index.md
+    <stack>.md
   shared/               # reusable cross-stack rulesets
     <rule-name>.md
   skills/               # skills used to integrate with these policies
@@ -38,12 +41,14 @@ Current repository layout:
 - `doc.md` must provide a canonical table with short stack key, full stack name, module path, and `load_when`.
 - `doc.md` must instruct agents to always load baseline modules and load project-specific stacks by `load_when` signals.
 - `doc.md` must define section semantics: `Strict rules` for technical constraints, and `Working Agreements` for user-agent interaction protocol.
+- `doc.md` must define how to load and enforce `awesome/index.md` and stack-specific awesome files.
 - Changes to module paths or routing signals must update `doc.md` in the same change.
 - When adding a new stack, update `doc.md` with both the short stack key and full stack name.
 - Root `doc.md` should contain only routing/composition logic and helpers to assemble target `AGENTS.md`.
 
 ## Stack
 - Stack-specific guidance is maintained in `modules/*/doc.md`.
+- Enforced stack libraries/utilities are maintained in `awesome/*`.
 - If equivalent rules are shared by multiple stack modules, extract them to `shared/<rule-name>.md`.
 - Stack modules must link extracted shared rules by relative path (for module files: `[shared/<rule-name>.md](../../shared/<rule-name>.md)`).
 - Keep shared files concrete and tool-focused; stack modules should keep only stack-specific additions.
