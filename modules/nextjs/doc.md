@@ -12,6 +12,8 @@ This module defines baseline engineering rules for Next.js repositories and appl
 ```
 
 # Strict rules
+- MUST read enforced utility/library choices from [../../awesome/nextjs.md](../../awesome/nextjs.md) before introducing, replacing, or removing Next.js libraries.
+- MUST enforce `required` entries from [../../awesome/nextjs.md](../../awesome/nextjs.md) for matching capabilities.
 - MUST apply React-specific rules from [../react/doc.md](../react/doc.md).
 - MUST reuse shared baseline rules: [../../shared/js-biome-bun-core.md](../../shared/js-biome-bun-core.md).
 - MUST reuse shared conventions: [../../shared/biome-conventions.md](../../shared/biome-conventions.md).

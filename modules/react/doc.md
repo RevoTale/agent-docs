@@ -12,10 +12,12 @@ This module defines baseline engineering rules for React repositories and applic
 ```
 
 # Strict rules
+- MUST read enforced utility/library choices from [../../awesome/react.md](../../awesome/react.md) before introducing, replacing, or removing React libraries.
+- MUST enforce `required` entries from [../../awesome/react.md](../../awesome/react.md) for matching capabilities.
 - MUST reuse shared baseline rules: [../../shared/js-biome-bun-core.md](../../shared/js-biome-bun-core.md).
 - MUST reuse shared conventions: [../../shared/biome-conventions.md](../../shared/biome-conventions.md).
 - MUST avoid plain `.js` files and use `.ts` / `.tsx` instead, including configs when possible.
-- MUST run React build, test, and development workflows through Bun.
+- MUST run React build, test, and development workflows through Bun or Taskfile (if there is some). 
 - SHOULD define components using functional component patterns.
 - SHOULD prefer one file per component.
 - MUST keep Bun lockfiles in source control.

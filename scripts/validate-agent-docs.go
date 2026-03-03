@@ -15,6 +15,8 @@ const (
 	rootPolicyPath  = "AGENTS.md"
 	moduleDocGlob   = "modules/*/doc.md"
 	moduleLegacyGlob = "modules/*/AGENTS.md"
+	awesomeIndexPath = "awesome/index.md"
+	awesomeDocGlob   = "awesome/*.md"
 
 	sectionStrictRules      = "Strict rules"
 	sectionWorkingAgreement = "Working Agreements"
@@ -28,6 +30,8 @@ var (
 	bulletPattern       = regexp.MustCompile(`^\s*-\s+`)
 	normativeBullet     = regexp.MustCompile(`^\s*-\s+(MUST|SHOULD|MAY)(\s|$)`)
 	registryRowPattern  = regexp.MustCompile(`^\|\s*[^|]+\|\s*[^|]+\|\s*modules/[^|]+\|`)
+	awesomeRowPattern   = regexp.MustCompile(`^\|\s*[^|]+\|\s*\.?/?.*\.md\s*\|`)
+	awesomeStatusRow    = regexp.MustCompile(`^\|\s*[^|]+\|\s*(required|preferred|banned)\s*\|`)
 	waForbiddenPatterns = []*regexp.Regexp{
 		regexp.MustCompile(`(?i)task\s+(gen(:check|:code-diff)?|fix|validate|test)(\s|$)`),
 		regexp.MustCompile(`(?i)bun\s+(run|install)(\s|$)`),
@@ -145,6 +149,42 @@ func parseRegistryPaths(path string) ([]string, error) {
 	return paths, nil
 }
 
+func parseAwesomeRegistryPaths(path string) ([]string, error) {
+	lines, err := readLines(path)
+	if err != nil {
+		return nil, err
+	}
+
+	paths := make([]string, 0, 8)
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if !awesomeRowPattern.MatchString(trimmed) {
+			continue
+		}
+
+		parts := strings.Split(trimmed, "|")
+		if len(parts) < 4 {
+			continue
+		}
+
+		awesomePath := strings.TrimSpace(parts[2])
+		if awesomePath == "" {
+			continue
+		}
+
+		awesomePath = strings.TrimPrefix(awesomePath, "[")
+		if closeIdx := strings.Index(awesomePath, "]("); closeIdx >= 0 {
+			target := awesomePath[closeIdx+2:]
+			awesomePath = strings.TrimSuffix(target, ")")
+		}
+
+		clean := filepath.Clean(filepath.Join("awesome", strings.TrimPrefix(awesomePath, "./")))
+		paths = append(paths, clean)
+	}
+
+	return paths, nil
+}
+
 func isCodeFence(line string) bool {
 	return strings.HasPrefix(strings.TrimSpace(line), "```")
 }
@@ -236,6 +276,25 @@ func checkModuleSectionLayout(v *validator, modulePath string) {
 	}
 }
 
+func checkAwesomeFile(v *validator, awesomePath string) {
+	lines, err := readLines(awesomePath)
+	if err != nil {
+		v.failf("%s cannot be read: %v", awesomePath, err)
+		return
+	}
+
+	statusRows := 0
+	for _, line := range lines {
+		if awesomeStatusRow.MatchString(strings.TrimSpace(line)) {
+			statusRows++
+		}
+	}
+
+	if statusRows == 0 {
+		v.failf("%s must include at least one library row with status required|preferred|banned", awesomePath)
+	}
+}
+
 func main() {
 	v := &validator{}
 
@@ -256,6 +315,19 @@ func main() {
 	}
 	if len(registryPaths) == 0 {
 		v.failf("No module registry paths found in %s canonical table", routerDocPath)
+	}
+
+	if _, err := os.Stat(awesomeIndexPath); err != nil {
+		v.failf("Awesome registry entrypoint not found: %s", awesomeIndexPath)
+	}
+
+	awesomeRegistryPaths, err := parseAwesomeRegistryPaths(awesomeIndexPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR: %s cannot be parsed: %v\n", awesomeIndexPath, err)
+		os.Exit(1)
+	}
+	if len(awesomeRegistryPaths) == 0 {
+		v.failf("No awesome stack files found in %s table", awesomeIndexPath)
 	}
 
 	registrySet := make(map[string]struct{}, len(registryPaths))
@@ -283,6 +355,36 @@ func main() {
 			v.failf("Module doc is missing from %s registry: %s", routerDocPath, moduleDoc)
 		}
 		checkModuleSectionLayout(v, moduleDoc)
+	}
+
+	awesomeDocs, err := filepath.Glob(awesomeDocGlob)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR: awesome glob failure: %v\n", err)
+		os.Exit(1)
+	}
+	sort.Strings(awesomeDocs)
+
+	awesomeSet := make(map[string]struct{}, len(awesomeRegistryPaths))
+	for _, awesomePath := range awesomeRegistryPaths {
+		if _, exists := awesomeSet[awesomePath]; exists {
+			v.failf("Duplicate awesome registry path: %s", awesomePath)
+			continue
+		}
+		awesomeSet[awesomePath] = struct{}{}
+		if _, statErr := os.Stat(awesomePath); statErr != nil {
+			v.failf("Awesome registry path not found: %s", awesomePath)
+			continue
+		}
+		checkAwesomeFile(v, awesomePath)
+	}
+
+	for _, awesomeDoc := range awesomeDocs {
+		if awesomeDoc == awesomeIndexPath {
+			continue
+		}
+		if _, exists := awesomeSet[awesomeDoc]; !exists {
+			v.failf("Awesome file is missing from %s registry: %s", awesomeIndexPath, awesomeDoc)
+		}
 	}
 
 	filesToCheck := make([]string, 0, len(moduleDocs)+2)
