@@ -11,8 +11,8 @@ Central source for shared AGENTS policies of [RevoTale](https://revotale.com).
 
 - `AGENTS.md`: repository-level policy contract.
 - `doc.md`: canonical module registry, routing logic, and merge contract.
-- `awesome/index.md`: entrypoint for enforced utility/library choices by stack.
-- `awesome/<stack>.md`: stack-specific enforced utility/library lists.
+- `awesome/index.md`: entrypoint for enforced utility/library choices by stack or capability.
+- `awesome/<name>.md`: stack-specific or capability-specific enforced utility/library lists.
 - `shared/<rule-name>.md`: reusable cross-stack rulesets referenced by modules.
 - `modules/common/doc.md`: always-loaded baseline module.
 - `modules/<stack>/doc.md`: stack-specific modules.

@@ -9,8 +9,8 @@ This module defines baseline engineering rules for Go repositories and services.
 ```
 
 # Strict rules
-- MUST read enforced utility/library choices from [../../awesome/go.md](../../awesome/go.md) before introducing, replacing, or removing Go libraries.
-- MUST enforce `required` entries from [../../awesome/go.md](../../awesome/go.md) for matching capabilities.
+- MUST read enforced utility/library choices from [../../awesome/index.md](../../awesome/index.md), [../../awesome/go.md](../../awesome/go.md), and any matching capability awesome files before introducing, replacing, or removing Go libraries.
+- MUST enforce `required` entries from matching awesome files for corresponding Go capabilities.
 - MUST use `golangci-lint` as the Go linter: https://github.com/golangci/golangci-lint.
 - MUST enforce a maximum line length of 120 characters through golangci-lint configuration.
 - SHOULD prefer patterns from `100 Go Mistakes and How to Avoid Them`: https://github.com/teivah/100-go-mistakes.

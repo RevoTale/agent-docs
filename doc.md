@@ -22,11 +22,12 @@ Use this table as the single source of truth for module routing.
 4. Any module add/remove/rename or signal change must update this table in the same change.
 
 # Awesome Registry
-Use `awesome/index.md` as the entrypoint for enforced utility/library choices per stack.
+Use `awesome/index.md` as the entrypoint for enforced utility/library choices by stack or capability.
 
 Rules:
-- MUST read `awesome/index.md` and all matching stack awesome files before introducing, replacing, or removing libraries.
-- MUST enforce `required` entries from matching stack awesome files for corresponding capabilities.
+- MUST read `awesome/index.md` and all matching awesome files before introducing, replacing, or removing libraries.
+- MUST read `awesome/index.md` and all matching awesome files before planning the architecture of project.
+- MUST enforce `required` entries from matching awesome files for corresponding capabilities.
 - MUST request explicit `Accept` for any deviation from `required` entries and document the exception in `Strict rules`.
 - MUST NOT save the awesome list in the target project `AGENTS.md`. 
 - MUST lookup the fresh awesome index directory (https://github.com/RevoTale/agent-docs/blob/main/LICENSE) and related stack-specific before choosing the new libraries/dependeciecies to be added

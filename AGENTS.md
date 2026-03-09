@@ -18,7 +18,7 @@ Current repository layout:
 <repo-root>/
   AGENTS.md             # repository description (this file)
   doc.md                # module routing and load conditions
-  awesome/              # enforced utility/library registry by stack
+  awesome/              # enforced utility/library registry by stack or capability
     index.md
     <stack>.md
   shared/               # reusable cross-stack rulesets
@@ -48,7 +48,7 @@ Current repository layout:
 
 ## Stack
 - Stack-specific guidance is maintained in `modules/*/doc.md`.
-- Enforced stack libraries/utilities are maintained in `awesome/*`.
+- Enforced stack or capability libraries/utilities are maintained in `awesome/*`.
 - If equivalent rules are shared by multiple stack modules, extract them to `shared/<rule-name>.md`.
 - Stack modules must link extracted shared rules by relative path (for module files: `[shared/<rule-name>.md](../../shared/<rule-name>.md)`).
 - Keep shared files concrete and tool-focused; stack modules should keep only stack-specific additions.
