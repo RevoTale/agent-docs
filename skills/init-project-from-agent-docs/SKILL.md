@@ -1,59 +1,46 @@
 ---
 name: init-project-from-agent-docs
-description: Create or refresh a repository AGENTS.md by fetching the latest router and module policies from https://github.com/RevoTale/agent-docs at runtime, identifying project technology patterns, and linking only matching modules. Use when AGENTS.md is missing or outdated and hardcoded stack rules must be avoided.
+description: Interview-first workflow for new or near-empty repositories. Learn what the app should do, select the matching agent-docs modules and awesome capabilities, propose the initial architecture and AGENTS.md, and wait for explicit Accept before writing files.
 ---
 
-# Init Or Refresh AGENTS.md From Agent Docs
+# Initialize A Project From agent-docs
 
-Use this workflow with any AI agent.
+Use this skill when the repository is empty or early-stage and the user wants the initial architecture and `AGENTS.md` generated from product intent instead of existing code signals.
 
 ## Workflow
 
-1. Fetch the latest source of truth from the web.
-- Get the current default branch for `RevoTale/agent-docs` from GitHub API.
-- Fetch `AGENTS.router.md` from that branch.
-- Discover available module paths from router text and/or `modules/` directory listing.
-- Do not assume fixed technology names or a fixed module set.
-- Fetch module files only as needed for matching and validation.
-- Never rely on memory or stale local copies of this repository.
+1. Run a short architecture interview.
+- Ask only the questions needed to choose architecture: app purpose, user-facing surfaces, runtime shape (`web app`, `API`, `worker`, `CLI`), data and storage, auth and identity, key integrations, deployment constraints, and any mandated technologies.
+- If an answer is missing but a safe default exists, state the assumption explicitly instead of blocking.
+- If the repository already has substantial code or tooling, switch to `refresh-project-agents-from-agent-docs` or `refactor-project-to-agent-docs`.
 
-2. Learn target repository patterns.
-- Inspect the target repository files and folders.
-- Collect concrete signals (manifests, lockfiles, source extensions, framework folders, build config).
-- Evaluate router load conditions against those signals.
-- If matching is ambiguous, read candidate modules and choose by concrete file-pattern overlap.
-- If multiple modules match, include all of them.
-- If router defines always-load modules, include them.
+2. Load the current policy source of truth.
+- Resolve `doc.md` first, then `awesome/index.md`.
+- Load always-on modules from `doc.md`.
+- Load stack modules whose `load_when` conditions match the interview answers or any existing repository signals.
+- Load matching awesome files by stack and capability.
+- Do not hardcode technology names when the router or awesome registry can decide them.
 
-3. Auto-select mode.
-- If root `AGENTS.md` is missing, create one with `Overview`, `Base Policy Links (Load First)`, and `Local Details`.
-- If root `AGENTS.md` exists, refresh `Base Policy Links (Load First)` to latest router/module links.
-- Preserve valid repository-specific `Local Details`.
-- Remove stale links that no longer match router or repository signals.
+3. Propose the initial architecture before writing.
+- Summarize the project brief in 3-6 bullets.
+- Show selected modules and why they match.
+- Show selected awesome capabilities and the required libraries they imply.
+- Draft the target `AGENTS.md` structure with `Overview`, `Base Policy Links (Load First)`, and `Local Details`.
+- Call out assumptions, open questions, and non-default choices.
 
-4. Write base policy links.
-- Keep root content repository-specific.
-- Add a link to `AGENTS.router.md`.
-- Add links to selected module files.
-- Use the latest default-branch links unless the user requested commit-pinned links.
+4. Wait for explicit approval.
+- Ask for explicit `Accept` before creating or updating `AGENTS.md` or suggesting code scaffolding.
+- If the user changes scope, revise the proposal and ask again.
 
-5. Keep local details repository-specific.
-- Keep concrete commands, folder ownership, runtime constraints, and explicit exceptions.
-- Do not copy module policy text inline when links are sufficient.
+5. Write the initial `AGENTS.md`.
+- Create a repository-specific `Overview`.
+- Add links to `doc.md`, `awesome/index.md`, always-on modules, and matched stack modules.
+- Use latest default-branch links unless the user asked for commit-pinned links.
+- Keep `Local Details` limited to project-specific constraints, decisions, and approved exceptions.
+- Do not inline module policy text when links are sufficient.
+- Do not copy awesome registry tables into the target `AGENTS.md`.
 
-6. Validate before finishing.
-- Confirm each linked file exists on GitHub.
-- Confirm module selection is justified by router conditions.
-- Confirm no hardcoded technology mapping was introduced by the skill itself.
-- Report exactly which remote files and branch or commit were used.
-
-## Portability
-
-- This `SKILL.md` is the canonical, provider-neutral instruction set.
-- Adapter files for specific tools may exist, but they should mirror this file and must not weaken these rules.
-
-## Universality Rules
-
-- Re-learn from fresh `RevoTale/agent-docs` data on every run.
-- Let router/module content drive technology selection instead of static stack lists.
-- When new technology modules are added in `agent-docs`, they should be discovered and applied automatically if repository patterns match.
+6. Validate and report.
+- Confirm every linked file exists in the selected `agent-docs` revision.
+- Report which router, module, and awesome files were selected and why.
+- Report any assumptions that still need user confirmation.

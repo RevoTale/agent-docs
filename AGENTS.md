@@ -20,11 +20,12 @@ Current repository layout:
   doc.md                # module routing and load conditions
   awesome/              # enforced utility/library registry by stack or capability
     index.md
-    <stack>.md
+    <name>.md
   shared/               # reusable cross-stack rulesets
     <rule-name>.md
   skills/               # skills used to integrate with these policies
-    <skill-name>.md
+    <skill-name>/
+      SKILL.md
   modules/              # stack-specific guidance
     <module-name>/doc.md
 ```
@@ -41,7 +42,7 @@ Current repository layout:
 - `doc.md` must provide a canonical table with short stack key, full stack name, module path, and `load_when`.
 - `doc.md` must instruct agents to always load baseline modules and load project-specific stacks by `load_when` signals.
 - `doc.md` must define section semantics: `Strict rules` for technical constraints, and `Working Agreements` for user-agent interaction protocol.
-- `doc.md` must define how to load and enforce `awesome/index.md` and stack-specific awesome files.
+- `doc.md` must define how to load and enforce `awesome/index.md` and matching awesome files.
 - Changes to module paths or routing signals must update `doc.md` in the same change.
 - When adding a new stack, update `doc.md` with both the short stack key and full stack name.
 - Root `doc.md` should contain only routing/composition logic and helpers to assemble target `AGENTS.md`.
@@ -52,6 +53,13 @@ Current repository layout:
 - If equivalent rules are shared by multiple stack modules, extract them to `shared/<rule-name>.md`.
 - Stack modules must link extracted shared rules by relative path (for module files: `[shared/<rule-name>.md](../../shared/<rule-name>.md)`).
 - Keep shared files concrete and tool-focused; stack modules should keep only stack-specific additions.
+
+## Skills
+- Skills are maintained in `skills/<skill-name>/SKILL.md`.
+- Skills must treat `doc.md` and `awesome/index.md` as the source of truth and must not introduce alternate router filenames.
+- Skills that initialize from scratch or refactor existing repositories must run an architecture interview before selecting modules or refactoring code.
+- Skills must wait for explicit `Accept` before writing `AGENTS.md` or performing architecture-driven refactors.
+- Skills that mutate an existing codebase must propose a phased plan before editing files.
 
 ## Rules combination
 Rules in this project must be combined so a target agent can merge them into a single `AGENTS.md` using the contract defined in `doc.md`.

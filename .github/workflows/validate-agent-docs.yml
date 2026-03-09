@@ -19,5 +19,5 @@ jobs:
       - name: Test validator
         run: go test ./scripts/validate-agent-docs.go ./scripts/validate-agent-docs_test.go
 
-      - name: Validate policy docs
+      - name: Validate policy docs and skills
         run: go run ./scripts/validate-agent-docs.go

@@ -11,12 +11,14 @@ import (
 )
 
 const (
-	routerDocPath   = "doc.md"
-	rootPolicyPath  = "AGENTS.md"
-	moduleDocGlob   = "modules/*/doc.md"
+	routerDocPath    = "doc.md"
+	rootPolicyPath   = "AGENTS.md"
+	moduleDocGlob    = "modules/*/doc.md"
 	moduleLegacyGlob = "modules/*/AGENTS.md"
 	awesomeIndexPath = "awesome/index.md"
 	awesomeDocGlob   = "awesome/*.md"
+	skillsDirPath    = "skills"
+	skillDocGlob     = "skills/*/SKILL.md"
 
 	sectionStrictRules      = "Strict rules"
 	sectionWorkingAgreement = "Working Agreements"
@@ -30,8 +32,10 @@ var (
 	bulletPattern       = regexp.MustCompile(`^\s*-\s+`)
 	normativeBullet     = regexp.MustCompile(`^\s*-\s+(MUST|SHOULD|MAY)(\s|$)`)
 	registryRowPattern  = regexp.MustCompile(`^\|\s*[^|]+\|\s*[^|]+\|\s*modules/[^|]+\|`)
-	awesomeRowPattern   = regexp.MustCompile(`^\|\s*[^|]+\|\s*\.?/?.*\.md\s*\|`)
+	awesomeRowPattern   = regexp.MustCompile(`^\|\s*[^|]+\|\s*(\[[^]]+\]\([^)]*\.md\)|\.?/?.*\.md)\s*\|`)
 	awesomeStatusRow    = regexp.MustCompile(`^\|\s*[^|]+\|\s*(required|preferred|banned)\s*\|`)
+	skillNamePattern    = regexp.MustCompile(`^name:\s*(.+?)\s*$`)
+	skillDescPattern    = regexp.MustCompile(`^description:\s*(.+?)\s*$`)
 	waForbiddenPatterns = []*regexp.Regexp{
 		regexp.MustCompile(`(?i)task\s+(gen(:check|:code-diff)?|fix|validate|test)(\s|$)`),
 		regexp.MustCompile(`(?i)bun\s+(run|install)(\s|$)`),
@@ -52,6 +56,12 @@ var (
 
 type validator struct {
 	failures []string
+}
+
+type skillDoc struct {
+	name        string
+	description string
+	body        string
 }
 
 func (v *validator) failf(format string, args ...any) {
@@ -189,6 +199,45 @@ func isCodeFence(line string) bool {
 	return strings.HasPrefix(strings.TrimSpace(line), "```")
 }
 
+func parseSkillDoc(path string) (skillDoc, error) {
+	lines, err := readLines(path)
+	if err != nil {
+		return skillDoc{}, err
+	}
+
+	if len(lines) < 3 || strings.TrimSpace(lines[0]) != "---" {
+		return skillDoc{}, fmt.Errorf("missing YAML frontmatter")
+	}
+
+	frontmatterEnd := -1
+	for idx := 1; idx < len(lines); idx++ {
+		if strings.TrimSpace(lines[idx]) == "---" {
+			frontmatterEnd = idx
+			break
+		}
+	}
+	if frontmatterEnd == -1 {
+		return skillDoc{}, fmt.Errorf("frontmatter closing delimiter not found")
+	}
+
+	doc := skillDoc{
+		body: strings.Join(lines[frontmatterEnd+1:], "\n"),
+	}
+
+	for _, line := range lines[1:frontmatterEnd] {
+		trimmed := strings.TrimSpace(line)
+		if matches := skillNamePattern.FindStringSubmatch(trimmed); matches != nil {
+			doc.name = strings.Trim(strings.TrimSpace(matches[1]), `"'`)
+			continue
+		}
+		if matches := skillDescPattern.FindStringSubmatch(trimmed); matches != nil {
+			doc.description = strings.Trim(strings.TrimSpace(matches[1]), `"'`)
+		}
+	}
+
+	return doc, nil
+}
+
 func checkNormativeBullets(v *validator, filePath string, sectionTitle string) {
 	lines, err := readLines(filePath)
 	if err != nil {
@@ -295,6 +344,88 @@ func checkAwesomeFile(v *validator, awesomePath string) {
 	}
 }
 
+func checkSkillsLayout(v *validator) {
+	entries, err := os.ReadDir(skillsDirPath)
+	if err != nil {
+		v.failf("%s cannot be read: %v", skillsDirPath, err)
+		return
+	}
+
+	if len(entries) == 0 {
+		v.failf("%s must contain at least one skill directory", skillsDirPath)
+		return
+	}
+
+	for _, entry := range entries {
+		entryPath := filepath.Join(skillsDirPath, entry.Name())
+		if strings.HasPrefix(entry.Name(), ".") {
+			continue
+		}
+		if !entry.IsDir() {
+			v.failf("%s must contain only skill directories; found file: %s", skillsDirPath, entryPath)
+			continue
+		}
+
+		skillPath := filepath.Join(entryPath, "SKILL.md")
+		if _, statErr := os.Stat(skillPath); statErr != nil {
+			v.failf("Skill directory is missing SKILL.md: %s", skillPath)
+		}
+	}
+}
+
+func checkSkillFile(v *validator, skillPath string) {
+	doc, err := parseSkillDoc(skillPath)
+	if err != nil {
+		v.failf("%s is invalid: %v", skillPath, err)
+		return
+	}
+
+	folderName := filepath.Base(filepath.Dir(skillPath))
+	if doc.name == "" {
+		v.failf("%s must define frontmatter field: name", skillPath)
+	}
+	if doc.description == "" {
+		v.failf("%s must define frontmatter field: description", skillPath)
+	}
+	if doc.name != "" && doc.name != folderName {
+		v.failf("%s frontmatter name must match its folder name (%s)", skillPath, folderName)
+	}
+
+	fullText := strings.Join([]string{doc.name, doc.description, doc.body}, "\n")
+	lowerText := strings.ToLower(fullText)
+
+	if strings.Contains(fullText, "AGENTS.router.md") {
+		v.failf("%s must reference doc.md instead of deprecated AGENTS.router.md", skillPath)
+	}
+
+	switch folderName {
+	case "init-project-from-agent-docs":
+		if !strings.Contains(lowerText, "interview") {
+			v.failf("%s must require an architecture interview", skillPath)
+		}
+		if !strings.Contains(fullText, "Accept") {
+			v.failf("%s must require explicit Accept before writing", skillPath)
+		}
+	case "refresh-project-agents-from-agent-docs":
+		if !strings.Contains(lowerText, "signal") {
+			v.failf("%s must describe repository-signal based selection", skillPath)
+		}
+		if !strings.Contains(fullText, "Accept") {
+			v.failf("%s must require explicit Accept before writing", skillPath)
+		}
+	case "refactor-project-to-agent-docs":
+		if !strings.Contains(lowerText, "interview") {
+			v.failf("%s must require an architecture interview", skillPath)
+		}
+		if !strings.Contains(lowerText, "plan") {
+			v.failf("%s must require a refactor plan before edits", skillPath)
+		}
+		if !strings.Contains(fullText, "Accept") {
+			v.failf("%s must require explicit Accept before refactoring", skillPath)
+		}
+	}
+}
+
 func main() {
 	v := &validator{}
 
@@ -327,7 +458,7 @@ func main() {
 		os.Exit(1)
 	}
 	if len(awesomeRegistryPaths) == 0 {
-		v.failf("No awesome stack files found in %s table", awesomeIndexPath)
+		v.failf("No awesome files found in %s table", awesomeIndexPath)
 	}
 
 	registrySet := make(map[string]struct{}, len(registryPaths))
@@ -385,6 +516,23 @@ func main() {
 		if _, exists := awesomeSet[awesomeDoc]; !exists {
 			v.failf("Awesome file is missing from %s registry: %s", awesomeIndexPath, awesomeDoc)
 		}
+	}
+
+	checkSkillsLayout(v)
+
+	skillDocs, err := filepath.Glob(skillDocGlob)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR: skill glob failure: %v\n", err)
+		os.Exit(1)
+	}
+	sort.Strings(skillDocs)
+
+	if len(skillDocs) == 0 {
+		v.failf("No skill files found in %s", skillDocGlob)
+	}
+
+	for _, skillPath := range skillDocs {
+		checkSkillFile(v, skillPath)
 	}
 
 	filesToCheck := make([]string, 0, len(moduleDocs)+2)

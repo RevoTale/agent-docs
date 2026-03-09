@@ -6,16 +6,25 @@ import (
 	"testing"
 )
 
-func writeTempDoc(t *testing.T, content string) string {
+func writeTempFile(t *testing.T, relPath string, content string) string {
 	t.Helper()
 
 	dir := t.TempDir()
-	path := filepath.Join(dir, "doc.md")
+	path := filepath.Join(dir, relPath)
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatalf("failed to create temp dir: %v", err)
+	}
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
-		t.Fatalf("failed to write temp doc: %v", err)
+		t.Fatalf("failed to write temp file: %v", err)
 	}
 
 	return path
+}
+
+func writeTempDoc(t *testing.T, content string) string {
+	t.Helper()
+
+	return writeTempFile(t, "doc.md", content)
 }
 
 func TestCheckNormativeBulletsPassesForMustBullets(t *testing.T) {
@@ -81,5 +90,68 @@ func TestParseAwesomeRegistryPaths(t *testing.T) {
 
 	if paths[1] != filepath.Clean("awesome/react.md") {
 		t.Fatalf("unexpected second path: %s", paths[1])
+	}
+}
+
+func TestParseSkillDocParsesFrontmatter(t *testing.T) {
+	path := writeTempFile(t, "skills/init-project-from-agent-docs/SKILL.md", `---
+name: init-project-from-agent-docs
+description: Initialize a repository from intent.
+---
+
+# Skill
+Interview the user first.
+`)
+
+	doc, err := parseSkillDoc(path)
+	if err != nil {
+		t.Fatalf("unexpected parse error: %v", err)
+	}
+
+	if doc.name != "init-project-from-agent-docs" {
+		t.Fatalf("unexpected skill name: %s", doc.name)
+	}
+
+	if doc.description != "Initialize a repository from intent." {
+		t.Fatalf("unexpected skill description: %s", doc.description)
+	}
+}
+
+func TestCheckSkillFileRejectsDeprecatedRouterReference(t *testing.T) {
+	path := writeTempFile(t, "skills/refresh-project-agents-from-agent-docs/SKILL.md", `---
+name: refresh-project-agents-from-agent-docs
+description: Refresh AGENTS for an existing repository.
+---
+
+# Skill
+
+Use repository signals and ask for Accept.
+Load AGENTS.router.md before matching modules.
+`)
+
+	v := &validator{}
+	checkSkillFile(v, path)
+
+	if len(v.failures) == 0 {
+		t.Fatalf("expected stale router reference failure, got none")
+	}
+}
+
+func TestCheckSkillFileRequiresInterviewForInitSkill(t *testing.T) {
+	path := writeTempFile(t, "skills/init-project-from-agent-docs/SKILL.md", `---
+name: init-project-from-agent-docs
+description: Initialize a repository from intent.
+---
+
+# Skill
+
+Ask for explicit Accept before writing files.
+`)
+
+	v := &validator{}
+	checkSkillFile(v, path)
+
+	if len(v.failures) == 0 {
+		t.Fatalf("expected interview requirement failure, got none")
 	}
 }

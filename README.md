@@ -5,6 +5,7 @@ Central source for shared AGENTS policies of [RevoTale](https://revotale.com).
 ## Source of Truth
 
 - `AGENTS.md` and `doc.md` are the only policy sources of truth.
+- `skills/` contains operational workflows that must consume those sources of truth rather than redefine them.
 - `README.md` is an informative mirror and must stay aligned with those files.
 
 ## Repository Layout
@@ -16,20 +17,36 @@ Central source for shared AGENTS policies of [RevoTale](https://revotale.com).
 - `shared/<rule-name>.md`: reusable cross-stack rulesets referenced by modules.
 - `modules/common/doc.md`: always-loaded baseline module.
 - `modules/<stack>/doc.md`: stack-specific modules.
-- `skills/init-project-from-agent-docs/`: skill to initialize or refresh target `AGENTS.md`.
+- `skills/<skill-name>/SKILL.md`: operational skills for greenfield init, AGENTS refresh, and guided refactors.
 
-## Install Or Update In A Target Repository
+## Skill Workflows
 
-You can apply `agent-docs` in two ways: use the skill for automated create/update, or update `AGENTS.md` manually.
+Use the skill that matches the repository stage.
 
-### Use The Skill
+### Greenfield Init
 
 Skill path: `skills/init-project-from-agent-docs/SKILL.md`
 
 Example request:
-`Use https://github.com/RevoTale/agent-docs/skills/init-project-from-agent-docs skill to refresh AGENTS.md for this repository.`
+`Use https://github.com/RevoTale/agent-docs/skills/init-project-from-agent-docs skill to design the initial AGENTS.md for this new repository.`
 
-### Update Manually
+### Existing Repo AGENTS Refresh
+
+Skill path: `skills/refresh-project-agents-from-agent-docs/SKILL.md`
+
+Example request:
+`Use https://github.com/RevoTale/agent-docs/skills/refresh-project-agents-from-agent-docs skill to refresh AGENTS.md for this repository.`
+
+### Existing Repo Refactor
+
+Skill path: `skills/refactor-project-to-agent-docs/SKILL.md`
+
+Example request:
+`Use https://github.com/RevoTale/agent-docs/skills/refactor-project-to-agent-docs skill to align this repository with the recommended stack after an architecture interview.`
+
+## Update Manually
+
+You can still update `AGENTS.md` manually when automation is not desired.
 
 1. Create a root `AGENTS.md` if missing.
 2. Add `https://github.com/RevoTale/agent-docs/blob/main/doc.md` under `Base Policy Links (Load First)`.
