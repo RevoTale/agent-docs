@@ -19,6 +19,25 @@ Central source for shared AGENTS policies of [RevoTale](https://revotale.com).
 - `modules/<stack>/doc.md`: stack-specific modules.
 - `skills/<skill-name>/SKILL.md`: operational skills for greenfield init, AGENTS refresh, and guided refactors.
 
+## Nested AGENTS.md
+
+Target repositories may use a root `AGENTS.md` plus nested `AGENTS.md` files when different subprojects need more specific stack rules.
+
+Example:
+
+```text
+<repo-root>/
+  AGENTS.md
+  frontend/
+    AGENTS.md
+    package.json
+  backend/
+    AGENTS.md
+    go.mod
+```
+
+Use nested files for meaningful architecture boundaries such as apps, services, or packages with distinct tooling. The nearest `AGENTS.md` should apply to the active subtree, while parent files stay additive for shared rules.
+
 ## Skill Workflows
 
 Use the skill that matches the repository stage.
@@ -28,21 +47,21 @@ Use the skill that matches the repository stage.
 Skill path: `skills/init-project-from-agent-docs/SKILL.md`
 
 Example request:
-`Use https://github.com/RevoTale/agent-docs/skills/init-project-from-agent-docs skill to design the initial AGENTS.md for this new repository.`
+`Use https://github.com/RevoTale/agent-docs/skills/init-project-from-agent-docs skill to design the initial root and nested AGENTS.md files for this new repository.`
 
 ### Existing Repo AGENTS Refresh
 
 Skill path: `skills/refresh-project-agents-from-agent-docs/SKILL.md`
 
 Example request:
-`Use https://github.com/RevoTale/agent-docs/skills/refresh-project-agents-from-agent-docs skill to refresh AGENTS.md for this repository.`
+`Use https://github.com/RevoTale/agent-docs/skills/refresh-project-agents-from-agent-docs skill to refresh the root and nested AGENTS.md files for this repository.`
 
 ### Existing Repo Refactor
 
 Skill path: `skills/refactor-project-to-agent-docs/SKILL.md`
 
 Example request:
-`Use https://github.com/RevoTale/agent-docs/skills/refactor-project-to-agent-docs skill to align this repository with the recommended stack after an architecture interview.`
+`Use https://github.com/RevoTale/agent-docs/skills/refactor-project-to-agent-docs skill to align this repository and its nested subprojects with the recommended stack after an architecture interview.`
 
 ## Update Manually
 

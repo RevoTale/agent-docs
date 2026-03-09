@@ -20,36 +20,38 @@ Use this workflow when the goal is to align an existing project with `agent-docs
 ## Workflow
 
 1. Run the architecture interview.
-- Capture app purpose, critical flows, runtime surfaces, data and storage, auth and identity, integrations, deployment constraints, mandated technologies, and allowed migration risk.
+- Capture app purpose, whether the repository is single-app or multi-app, critical flows, runtime surfaces, data and storage, auth and identity, integrations, deployment constraints, mandated technologies, and allowed migration risk.
 - Separate what may change now from what must stay stable.
 - If the repository intent is already documented, confirm it instead of re-asking everything.
 
 2. Load the current `agent-docs` source of truth.
 - Resolve `doc.md` first, then `awesome/index.md`.
-- Load always-on modules, matched stack modules, and matching awesome files.
-- Use repository signals and interview answers together to choose the target architecture.
+- Detect app and service boundaries such as `frontend/`, `backend/`, `apps/*`, `services/*`, `packages/*`, or equivalent user-declared subprojects.
+- Load always-on modules, matched stack modules, and matching awesome files for the root and each subtree.
+- Use repository signals and interview answers together to choose the target architecture for each subtree.
 - Treat the current repository `AGENTS.md` as local input to preserve valid repository-specific exceptions, not as the router source of truth.
 
 3. Audit the target project against policy.
-- Inspect structure, dependency and runtime setup, task runner config, lint and format config, tests, build entrypoints, and major code patterns.
-- Identify mismatches between current project state and loaded policy rules.
+- Inspect structure, dependency and runtime setup, task runner config, lint and format config, tests, build entrypoints, and major code patterns for the root and each subtree.
+- Identify mismatches between current project state and loaded policy rules per subtree.
 - Capture baseline command results for lint, test, and build when those commands exist.
 
 4. Propose the target architecture and plan.
-- Summarize selected modules, awesome capabilities, and required library or tooling changes.
+- Summarize selected modules, awesome capabilities, and required library or tooling changes for the root and each nested subproject.
+- Explain where nested `AGENTS.md` files are required and how nearest-file precedence applies to each subtree.
 - Output an ordered phase plan with goals, impacted files, risks, validations, and rollback notes for risky steps.
-- Cover at minimum: structure, task runner/tasks, linting/formatting, code-style normalization, dependency alignment, and `AGENTS.md` updates.
+- Cover at minimum: structure, task runner/tasks, linting/formatting, code-style normalization, dependency alignment, and root plus nested `AGENTS.md` updates.
 - Ask for explicit `Accept` before editing.
 
 5. Execute by phase.
 - Refactor structure to the approved policy-aligned layout and naming.
 - Refactor automation and tasking to match expected workflow patterns.
 - Refactor lint, format, and dependency setup to the approved stack and capability choices.
-- Refactor code style and architecture incrementally while preserving approved behavior.
-- Update `AGENTS.md` and developer documentation so commands and rules remain accurate.
+- Refactor code style and architecture incrementally per subtree while preserving approved behavior.
+- Update root and nested `AGENTS.md` files and developer documentation so commands and rules remain accurate.
 
 6. Verify `agent-docs` compliance.
-- Build a rule-by-rule checklist from the loaded modules and awesome files.
+- Build a rule-by-rule checklist from the loaded modules and awesome files for the root and each subtree.
 - Mark each rule as `pass`, `fail`, or `not-applicable` with file or command evidence.
 - Fix `fail` items that are in scope.
 

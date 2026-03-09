@@ -9,7 +9,7 @@ It stores strict project rules that define architecture policy including:
 - code patterns
 - custom strict rules
 
-Based on the target project, stack modules are combined into a single root `AGENTS.md` via the appropriate skill. It assembles project-specific rules while preserving shared conventions.
+Based on the target project, stack modules are combined into root and nested `AGENTS.md` files via the appropriate skill when subprojects need more specific policy. It assembles project-specific rules while preserving shared conventions.
 
 # Folder Structure
 Current repository layout:
@@ -28,6 +28,8 @@ Current repository layout:
       SKILL.md
   modules/              # stack-specific guidance
     <module-name>/doc.md
+  <subproject>/
+    AGENTS.md           # nested policy for a specific app/service/package
 ```
 
 # Root AGENTS.md rules
@@ -41,11 +43,17 @@ Current repository layout:
 - `doc.md` must include references to all baseline and stack modules.
 - `doc.md` must provide a canonical table with short stack key, full stack name, module path, and `load_when`.
 - `doc.md` must instruct agents to always load baseline modules and load project-specific stacks by `load_when` signals.
+- `doc.md` must define when to create nested `AGENTS.md` files and how parent/child precedence works.
 - `doc.md` must define section semantics: `Strict rules` for technical constraints, and `Working Agreements` for user-agent interaction protocol.
 - `doc.md` must define how to load and enforce `awesome/index.md` and matching awesome files.
 - Changes to module paths or routing signals must update `doc.md` in the same change.
 - When adding a new stack, update `doc.md` with both the short stack key and full stack name.
 - Root `doc.md` should contain only routing/composition logic and helpers to assemble target `AGENTS.md`.
+
+## Target Output
+- Target repositories may contain a root `AGENTS.md` plus nested `AGENTS.md` files for subprojects with distinct stack, runtime, or ownership boundaries.
+- Root `AGENTS.md` should stay repository-wide; nested `AGENTS.md` files should narrow rules for their subtree.
+- Nested `AGENTS.md` files should be created only for meaningful architecture boundaries such as apps, services, or packages with distinct tooling.
 
 ## Stack
 - Stack-specific guidance is maintained in `modules/*/doc.md`.
@@ -57,6 +65,7 @@ Current repository layout:
 ## Skills
 - Skills are maintained in `skills/<skill-name>/SKILL.md`.
 - Skills must treat `doc.md` and `awesome/index.md` as the source of truth and must not introduce alternate router filenames.
+- Skills must support root and nested `AGENTS.md` output when the repository contains multiple app or service boundaries.
 - Skills that initialize from scratch or refactor existing repositories must run an architecture interview before selecting modules or refactoring code.
 - Skills must wait for explicit `Accept` before writing `AGENTS.md` or performing architecture-driven refactors.
 - Skills that mutate an existing codebase must propose a phased plan before editing files.

@@ -1,6 +1,6 @@
 # Overview
 This file is the universal AGENTS router and composition contract.
-It defines which module files to load and how to merge them into a target repository `AGENTS.md`.
+It defines which module files to load and how to merge them into target repository `AGENTS.md` files.
 
 # Canonical Module Registry
 Use this table as the single source of truth for module routing.
@@ -20,6 +20,16 @@ Use this table as the single source of truth for module routing.
 2. Evaluate all other rows and load a module when any signal in its `load_when` condition matches.
 3. If multiple modules match, load all matched modules.
 4. Any module add/remove/rename or signal change must update this table in the same change.
+
+# Nested AGENTS.md Output
+- MUST create a root `AGENTS.md` for repository-wide topology, shared workflows, and cross-project constraints.
+- MUST create nested `AGENTS.md` files for deployable apps, backend services, frontend apps, packages, or subprojects with distinct stack signals, runtime boundaries, or policy needs.
+- MUST detect boundaries such as `frontend/`, `backend/`, `apps/*`, `services/*`, `packages/*`, or equivalent user-declared subprojects.
+- MUST select modules and matching awesome files independently for each nested subproject.
+- MUST apply the nearest `AGENTS.md` to files in its subtree.
+- MUST keep parent `AGENTS.md` files additive for shared rules.
+- MUST let the more specific nested `AGENTS.md` override parent rules when stack-specific or subtree-specific rules conflict.
+- MUST NOT create nested `AGENTS.md` files for ordinary folders that do not introduce distinct architecture, tooling, runtime, or ownership rules.
 
 # Awesome Registry
 Use `awesome/index.md` as the entrypoint for enforced utility/library choices by stack or capability.
@@ -89,6 +99,18 @@ When merging two project structures, produce a union of paths and preserve `OR` 
  |package.json
  |biome.json
  |bun.lock|bun.lockb
+```
+
+#### Example of nested project structures
+```text
+<monorepo-root>/
+ |AGENTS.md
+ |frontend/
+ | |AGENTS.md
+ | |package.json
+ |backend/
+ | |AGENTS.md
+ | |go.mod
 ```
 
 ### Strict rules

@@ -238,6 +238,21 @@ func parseSkillDoc(path string) (skillDoc, error) {
 	return doc, nil
 }
 
+func checkRequiredSubstrings(v *validator, path string, required ...string) {
+	lines, err := readLines(path)
+	if err != nil {
+		v.failf("%s cannot be read: %v", path, err)
+		return
+	}
+
+	fullText := strings.Join(lines, "\n")
+	for _, needle := range required {
+		if !strings.Contains(fullText, needle) {
+			v.failf("%s must mention %q", path, needle)
+		}
+	}
+}
+
 func checkNormativeBullets(v *validator, filePath string, sectionTitle string) {
 	lines, err := readLines(filePath)
 	if err != nil {
@@ -403,6 +418,9 @@ func checkSkillFile(v *validator, skillPath string) {
 		if !strings.Contains(lowerText, "interview") {
 			v.failf("%s must require an architecture interview", skillPath)
 		}
+		if !strings.Contains(lowerText, "nested") {
+			v.failf("%s must describe nested AGENTS.md creation", skillPath)
+		}
 		if !strings.Contains(fullText, "Accept") {
 			v.failf("%s must require explicit Accept before writing", skillPath)
 		}
@@ -410,12 +428,21 @@ func checkSkillFile(v *validator, skillPath string) {
 		if !strings.Contains(lowerText, "signal") {
 			v.failf("%s must describe repository-signal based selection", skillPath)
 		}
+		if !strings.Contains(lowerText, "nested") {
+			v.failf("%s must describe nested AGENTS.md refresh", skillPath)
+		}
+		if !strings.Contains(lowerText, "frontend/") && !strings.Contains(lowerText, "apps/*") {
+			v.failf("%s must describe nested app or service boundaries", skillPath)
+		}
 		if !strings.Contains(fullText, "Accept") {
 			v.failf("%s must require explicit Accept before writing", skillPath)
 		}
 	case "refactor-project-to-agent-docs":
 		if !strings.Contains(lowerText, "interview") {
 			v.failf("%s must require an architecture interview", skillPath)
+		}
+		if !strings.Contains(lowerText, "subtree") && !strings.Contains(lowerText, "subproject") {
+			v.failf("%s must describe per-subtree or per-subproject refactoring", skillPath)
 		}
 		if !strings.Contains(lowerText, "plan") {
 			v.failf("%s must require a refactor plan before edits", skillPath)
@@ -534,6 +561,10 @@ func main() {
 	for _, skillPath := range skillDocs {
 		checkSkillFile(v, skillPath)
 	}
+
+	checkRequiredSubstrings(v, routerDocPath, "nested `AGENTS.md`", "nearest `AGENTS.md`", "root `AGENTS.md`")
+	checkRequiredSubstrings(v, rootPolicyPath, "nested `AGENTS.md`", "subprojects", "multiple app or service boundaries")
+	checkRequiredSubstrings(v, "README.md", "nested `AGENTS.md`", "frontend/", "backend/")
 
 	filesToCheck := make([]string, 0, len(moduleDocs)+2)
 	filesToCheck = append(filesToCheck, rootPolicyPath, routerDocPath)

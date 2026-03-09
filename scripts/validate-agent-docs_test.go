@@ -155,3 +155,35 @@ Ask for explicit Accept before writing files.
 		t.Fatalf("expected interview requirement failure, got none")
 	}
 }
+
+func TestCheckRequiredSubstringsFailsWhenTextIsMissing(t *testing.T) {
+	path := writeTempDoc(t, `# Overview
+Root policy only.
+`)
+
+	v := &validator{}
+	checkRequiredSubstrings(v, path, "nested `AGENTS.md`")
+
+	if len(v.failures) == 0 {
+		t.Fatalf("expected required substring failure, got none")
+	}
+}
+
+func TestCheckSkillFileRequiresNestedSupportForRefreshSkill(t *testing.T) {
+	path := writeTempFile(t, "skills/refresh-project-agents-from-agent-docs/SKILL.md", `---
+name: refresh-project-agents-from-agent-docs
+description: Refresh AGENTS for an existing repository.
+---
+
+# Skill
+
+Use repository signals and ask for explicit Accept before writing files.
+`)
+
+	v := &validator{}
+	checkSkillFile(v, path)
+
+	if len(v.failures) == 0 {
+		t.Fatalf("expected nested support failure, got none")
+	}
+}
