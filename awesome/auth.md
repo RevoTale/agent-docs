@@ -1,5 +1,5 @@
 # Awesome: Auth
-Enforced utility/library choices for authentication, authorization, identity, OAuth2, OIDC, and access-policy capabilities.
+Choices for authentication, authorization, identity, OAuth2, OIDC, and access-policy capabilities.
 
 | capability | status | package | source | notes |
 | --- | --- | --- | --- | --- |
