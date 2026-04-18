@@ -19,6 +19,7 @@ This module defines baseline engineering rules for Go repositories and services.
 - MUST require `task validate` to run `golangci-lint run` and pass for Go changes before merge.
 - MUST require `task test` to pass when defined and include `go test ./...` (or an explicit scoped equivalent).
 - MUST require `task fix` to run `gofmt` before merge.
+- entities MUST depend on data, not on a service bucket.
 
 # Working Agreements
 - MUST follow root interaction protocol from [../../AGENTS.md](../../AGENTS.md) before finalizing policy changes.
