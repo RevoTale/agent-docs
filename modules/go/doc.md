@@ -19,7 +19,43 @@ This module defines baseline engineering rules for Go repositories and services.
 - MUST require `task validate` to run `golangci-lint run` and pass for Go changes before merge.
 - MUST require `task test` to pass when defined and include `go test ./...` (or an explicit scoped equivalent).
 - MUST require `task fix` to run `gofmt` before merge.
-- entities MUST depend on data, not on a service bucket.
+- MUST ensure entities depend on data, not on a service bucket.
+
+Example:
+```go
+type Order struct {
+	ID     string
+	Status string
+}
+
+func (o *Order) Cancel() error {
+	if o.Status == "shipped" {
+		return errors.New("shipped orders cannot be cancelled")
+	}
+	o.Status = "cancelled"
+	return nil
+}
+```
+
+Anti-example:
+```go
+type Order struct {
+	ID       string
+	Status   string
+	repo     OrderRepository
+	notifier Mailer
+}
+
+func (o *Order) Cancel(ctx context.Context) error {
+	o.Status = "cancelled"
+	if err := o.repo.Save(ctx, o); err != nil {
+		return err
+	}
+	return o.notifier.SendOrderCancelled(o.ID)
+}
+```
+
+Keep repositories, mailers, and API clients in application services; keep the entity focused on its own state.
 
 # Working Agreements
 - MUST follow root interaction protocol from [../../AGENTS.md](../../AGENTS.md) before finalizing policy changes.
