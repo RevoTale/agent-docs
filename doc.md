@@ -14,6 +14,7 @@ Use this table as the single source of truth for module routing.
 | nextjs | Next.js | modules/nextjs/doc.md | `next.config.js|mjs|ts`, `package.json` includes `next`, or `app/` route files exist |
 | bun | Bun runtime/package manager | modules/bun/doc.md | `bun.lock` / `bun.lockb` / `bunfig.toml` exist, or `package.json` uses Bun tooling |
 | go | Go | modules/go/doc.md | `go.mod`, `go.work`, `*.go`, `cmd/`, or `internal/` exist |
+| templ | templ (Go HTML templating) | modules/templ/doc.md | `*.templ` files exist, `go.mod` includes `github.com/a-h/templ`, or Go files import `github.com/a-h/templ` |
 
 # Routing Rules
 1. Load all rows where `load_when` is `always`.
