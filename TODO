@@ -15,3 +15,5 @@ css cardRoot() {
   }
 }
 ```
+- MUST extract repeated typography treatment into shared templ primitives and compose them with local classes. Keep shared font family, weight, casing, and tracking in the primitive; keep per-component size, spacing, and color deltas local unless they are identical too.
+  Example: `class={ DisplayHeading(), cardTitle() }` is preferred over repeating `font-family: var(--font-display)` and the same heading tracking in every card, board, and footer title rule.
