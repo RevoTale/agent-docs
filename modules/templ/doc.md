@@ -41,6 +41,12 @@ For deeper templ syntax and behavior details, see `https://templ.guide/llms.md`.
   Example: [../../examples/templ/self-contained-component-family.md](../../examples/templ/self-contained-component-family.md)
 - SHOULD define component-local selectors with `css name() { ... }` in the same `.templ` file as the component that owns them.
   Example: [../../examples/templ/local-css-ownership.md](../../examples/templ/local-css-ownership.md)
+- SHOULD extract truly repeated typography treatment into shared typography primitives or a global typography layer, depending on ownership and scope.
+  Example: [../../examples/templ/shared-typography.md](../../examples/templ/shared-typography.md)
+- SHOULD keep shared font family, weight, casing, and tracking in the shared definition, and keep per-component size, spacing, and color deltas local unless they are identical too.
+  Example: [../../examples/templ/typography-local-deltas.md](../../examples/templ/typography-local-deltas.md)
+- SHOULD define typography globally when the same treatment is app-wide, applies to document-level content, or must also style non-templ consumers such as markdown, CMS content, or shared prose blocks.
+  Example: [../../examples/templ/global-typography-layer.md](../../examples/templ/global-typography-layer.md)
 - MUST treat templ CSS components as generated classes and MUST NOT depend on their generated names across files or from JS.
   Example: [../../examples/templ/generated-class-opacity.md](../../examples/templ/generated-class-opacity.md)
 - MUST apply templ CSS via `class={ ... }`, using CSS component calls, strings, maps, or `templ.KV(...)`, and MUST NOT hand-write generated hashed class names.
