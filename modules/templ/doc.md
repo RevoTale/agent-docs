@@ -34,7 +34,7 @@ For deeper templ syntax and behavior details, see `https://templ.guide/llms.md`.
 - SHOULD use the implicit `ctx` sparingly for cross-cutting request-scoped concerns such as locale, theme, or auth context, and SHOULD pass ordinary render data explicitly as component parameters.
   Example: [../../examples/templ/ctx-usage.md](../../examples/templ/ctx-usage.md)
 - SHOULD read request-scoped context in templates through small typed helper functions rather than raw `ctx.Value(...).(T)` expressions in markup.
-  Example: [../../examples/templ/ctx-usage.md](../../examples/templ/ctx-usage.md)
+  Example: [../../examples/templ/typed-ctx-access.md](../../examples/templ/typed-ctx-access.md)
 
 ## Styling and Component Ownership
 - SHOULD keep each visual component family self-contained in one owning `.templ` file when markup and local styling belong together.
@@ -52,11 +52,11 @@ For deeper templ syntax and behavior details, see `https://templ.guide/llms.md`.
 - SHOULD prefer templ CSS components over raw `<style>` blocks when the styling is local, flat, and owned by one component family.
   Example: [../../examples/templ/prefer-templ-css.md](../../examples/templ/prefer-templ-css.md)
 - SHOULD keep one CSS component when the structure is the same and only runtime values such as color, size, offset, delay, width, or progress change.
-  Example: [../../examples/templ/css-variable-ownership.md](../../examples/templ/css-variable-ownership.md)
+  Example: [../../examples/templ/single-css-component.md](../../examples/templ/single-css-component.md)
 - SHOULD prefer CSS custom properties for value-only variations over creating many near-duplicate CSS components.
   Example: [../../examples/templ/css-variable-ownership.md](../../examples/templ/css-variable-ownership.md)
 - SHOULD keep static defaults in `css {}` or global CSS, and use `style={ ... }` mainly for per-render overrides from an owning parent or root.
-  Example: [../../examples/templ/css-variable-ownership.md](../../examples/templ/css-variable-ownership.md)
+  Example: [../../examples/templ/css-static-defaults.md](../../examples/templ/css-static-defaults.md)
 - MUST prefer one component with parameters and conditional classes over duplicated markup branches when the structure is the same. 
   Example: [../../examples/templ/component-variants.md](../../examples/templ/component-variants.md)
 
@@ -74,11 +74,13 @@ For deeper templ syntax and behavior details, see `https://templ.guide/llms.md`.
 - MAY use `templ.JSFuncCall` for small direct `on*` handlers when that is the simplest safe fit.
   Example: [../../examples/templ/js-func-call.md](../../examples/templ/js-func-call.md)
 - SHOULD treat script templates as a legacy feature and SHOULD prefer standard `<script>` tags, `templ.JSFuncCall`, `templ.JSONString`, and `templ.JSONScript` for new code.
+  Example: [../../examples/templ/legacy-script-templates.md](../../examples/templ/legacy-script-templates.md)
 - MUST use stable hooks such as `data-*`, `id`, or `x-ref` for JS or Alpine targeting and MUST NOT query templ-generated CSS classes from client code.
   Example: [../../examples/templ/stable-hooks.md](../../examples/templ/stable-hooks.md)
 - MUST declare `templ.NewOnceHandle()` at package scope when a component needs to emit scripts, styles, or dependencies once per page render context.
   Example: [../../examples/templ/once-handle.md](../../examples/templ/once-handle.md)
 - SHOULD use `templ.URL(...)` for dynamic URL values in non-standard URL attributes such as `hx-get`, `hx-post`, or similar client-library attributes that templ does not auto-sanitize as URL attributes.
+  Example: [../../examples/templ/non-standard-url-attrs.md](../../examples/templ/non-standard-url-attrs.md)
 - SHOULD use `templ.JSONString` or `templ.JSONScript` when client code needs structured server data.
   Example: [../../examples/templ/structured-json.md](../../examples/templ/structured-json.md)
 
