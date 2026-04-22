@@ -45,7 +45,7 @@ For deeper templ syntax and behavior details, see `https://templ.guide/llms.md`.
   Example: [../../examples/templ/generated-class-opacity.md](../../examples/templ/generated-class-opacity.md)
 - MUST apply templ CSS via `class={ ... }`, using CSS component calls, strings, maps, or `templ.KV(...)`, and MUST NOT hand-write generated hashed class names.
   Example: [../../examples/templ/class-expression-usage.md](../../examples/templ/class-expression-usage.md)
-- MUST keep pseudo-elements, pseudo-classes, descendant or relational selectors, media queries, and keyframes in normal CSS rather than templ CSS components.
+- MUST keep pseudo-elements, pseudo-classes, descendant or relational selectors, media queries, and keyframes in normal CSS. templ built-in CSS components do not support these patterns.
   Example: [../../examples/templ/complex-selectors-normal-css.md](../../examples/templ/complex-selectors-normal-css.md)
 - SHOULD add stable raw class names when CSS selectors or styling contracts need to cross component boundaries or be consumed by external CSS, and SHOULD prefer `data-*`, `id`, or `x-ref` over raw classes for JS hooks.
   Example: [../../examples/templ/stable-contract-classes.md](../../examples/templ/stable-contract-classes.md)
