@@ -44,9 +44,11 @@ For deeper templ syntax and behavior details, see `https://templ.guide/llms.md`.
   Example: [../../examples/templ/stable-contract-classes.md](../../examples/templ/stable-contract-classes.md)
 - SHOULD prefer templ CSS components over raw `<style>` blocks when the styling is local, flat, and owned by one component family.
   Example: [../../examples/templ/prefer-templ-css.md](../../examples/templ/prefer-templ-css.md)
-- SHOULD keep one CSS component when the structure is the same and only runtime values such as color, size, offset, delay, width, or progress change. //TODO review this rule beccause I think its bad to udnerstant
+- SHOULD keep one CSS component when the structure is the same and only runtime values such as color, size, offset, delay, width, or progress change.
   Example: [../../examples/templ/css-variable-ownership.md](../../examples/templ/css-variable-ownership.md)
-- SHOULD prefer CSS custom properties for those value-only variations, with `style={ ... }` used only for dynamic overrides at render time. //TODO review this rule beccause I think its bad to udnerstant
+- SHOULD prefer CSS custom properties for value-only variations over creating many near-duplicate CSS components.
+  Example: [../../examples/templ/css-variable-ownership.md](../../examples/templ/css-variable-ownership.md)
+- SHOULD keep static defaults in `css {}` or global CSS, and use `style={ ... }` mainly for per-render overrides from an owning parent or root.
   Example: [../../examples/templ/css-variable-ownership.md](../../examples/templ/css-variable-ownership.md)
 - MUST prefer one component with parameters and conditional classes over duplicated markup branches when the structure is the same. 
   Example: [../../examples/templ/component-variants.md](../../examples/templ/component-variants.md)
@@ -56,6 +58,8 @@ For deeper templ syntax and behavior details, see `https://templ.guide/llms.md`.
   Example: [../../examples/templ/named-slots.md](../../examples/templ/named-slots.md)
 - MUST use `templ.Attributes` spread for wrapper-style composition and pass-through attributes.
   Example: [../../examples/templ/attributes-spread.md](../../examples/templ/attributes-spread.md)
+- SHOULD use standard `<script>` tags and standalone JS modules for client behavior that spans multiple elements or needs stable DOM hooks.
+  Example: [../../examples/templ/standard-script-modules.md](../../examples/templ/standard-script-modules.md)
 - MAY use `templ.JSFuncCall` or script templates for direct `on*` handlers when that is the simplest safe fit.
   Example: [../../examples/templ/js-func-call.md](../../examples/templ/js-func-call.md)
 - MUST use stable hooks such as `data-*`, `id`, or `x-ref` for JS or Alpine targeting and MUST NOT query templ-generated CSS classes from client code.
@@ -64,140 +68,6 @@ For deeper templ syntax and behavior details, see `https://templ.guide/llms.md`.
   Example: [../../examples/templ/once-handle.md](../../examples/templ/once-handle.md)
 - SHOULD use `templ.JSONString` or `templ.JSONScript` when client code needs structured server data.
   Example: [../../examples/templ/structured-json.md](../../examples/templ/structured-json.md)
-
-## Pattern: local CSS ownership
-Keep local selectors in the same `.templ` file as the component that owns them.
-
-```templ
-package components
-
-css cardRoot() {
-  display: grid;
-  gap: 0.75rem;
-  padding: 1rem;
-}
-
-css cardTitle() {
-  font-weight: 700;
-}
-
-templ Card(title string) {
-  <article class={ cardRoot() }>
-    <h3 class={ cardTitle() }>{ title }</h3>
-  </article>
-}
-```
-
-## Pattern: stable classes for complex selectors
-Use stable raw classes when selectors need relationships or features that templ CSS components should not own.
-
-```templ
-package components
-
-css cardRoot() {
-  padding: 1rem;
-}
-
-templ Card(title string) {
-  <article class={ cardRoot(), "card-root" }>
-    <h3 class="card-title">{ title }</h3>
-  </article>
-}
-```
-
-Keep selectors such as `.card-root:hover .card-title`, `.card-root::before`, `@media`, and `@keyframes` in normal CSS.
-
-## Pattern: wrapper composition
-Use `children...` for a single unnamed wrapped body.
-
-```templ
-package components
-
-import "github.com/a-h/templ"
-
-css panelShell() {
-  display: grid;
-  gap: 0.8rem;
-}
-
-templ PanelShell(attrs templ.Attributes) {
-  <section class={ panelShell() } { attrs... }>
-    { children... }
-  </section>
-}
-```
-
-## Pattern: named slots
-Use `templ.Component` parameters when slots are explicit.
-
-```templ
-package components
-
-import "github.com/a-h/templ"
-
-templ Board(header templ.Component, body templ.Component) {
-  <section>
-    <header>@header</header>
-    <div>@body</div>
-  </section>
-}
-```
-
-## Pattern: once-per-page dependencies
-Declare `templ.NewOnceHandle()` once at package scope and reuse it.
-
-```templ
-package components
-
-import "github.com/a-h/templ"
-
-var chartDeps = templ.NewOnceHandle()
-
-templ ChartDeps() {
-  @chartDeps.Once() {
-    <script type="module" src="/assets/chart.js"></script>
-  }
-}
-```
-
-## Pattern: client hooks
-Keep templ-generated classes styling-only and use stable hooks for behavior.
-
-```templ
-package components
-
-css dropdownRoot() {
-  display: grid;
-  gap: 0.4rem;
-}
-
-templ Dropdown() {
-  <div class={ dropdownRoot() } x-data="dropdown()" x-ref="root" data-dropdown>
-    <button type="button" data-dropdown-trigger>Open</button>
-  </div>
-}
-```
-
-## Pattern: view-model boundary
-Prepare display-specific data in Go before rendering when the UI shape differs from domain data.
-
-```go
-type InviteCardViewModel struct {
-  InviteCount  int
-  ErrorMessage string
-}
-```
-
-```templ
-templ InviteCard(vm InviteCardViewModel) {
-  if vm.InviteCount > 0 {
-    <div>{ fmt.Sprintf("%d invites", vm.InviteCount) }</div>
-  }
-  if vm.ErrorMessage != "" {
-    <div>{ vm.ErrorMessage }</div>
-  }
-}
-```
 
 # Working Agreements
 - MUST follow root interaction protocol from [../../AGENTS.md](../../AGENTS.md) before finalizing policy changes.
