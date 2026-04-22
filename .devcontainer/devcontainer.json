@@ -2,7 +2,7 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/go .
 {
   "name": "Documentation for the Agents",
-  "image": "mcr.microsoft.com/devcontainers/go:2-1-trixie",
+  "image": "mcr.microsoft.com/devcontainers/go:2.1-1.26-trixie",
   "features": {},
   "remoteUser": "vscode",
   "containerEnv": {
