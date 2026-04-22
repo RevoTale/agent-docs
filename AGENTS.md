@@ -28,6 +28,11 @@ Current repository layout:
       SKILL.md
   modules/              # stack-specific guidance
     <module-name>/doc.md
+  examples/             # example files and authoring guidance
+    pattern-anti-pattern.md
+    <stack>/
+      index.md
+      <example>.md
   <subproject>/
     AGENTS.md           # nested policy for a specific app/service/package
 ```
@@ -61,6 +66,11 @@ Current repository layout:
 - If equivalent rules are shared by multiple stack modules, extract them to `shared/<rule-name>.md`.
 - Stack modules must link extracted shared rules by relative path (for module files: `[shared/<rule-name>.md](../../shared/<rule-name>.md)`).
 - Keep shared files concrete and tool-focused; stack modules should keep only stack-specific additions.
+
+## Examples
+- Example authoring guidance is maintained in `examples/pattern-anti-pattern.md`.
+- Example files under `examples/` must follow that comparison contract.
+- Stack-specific example indexes such as `examples/<stack>/index.md` should point to the relevant example files and may reference the shared authoring guide.
 
 ## Skills
 - Skills are maintained in `skills/<skill-name>/SKILL.md`.
