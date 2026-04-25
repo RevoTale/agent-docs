@@ -18,7 +18,7 @@ css cardRoot() {
   Example: `class={ DisplayHeading(), cardTitle() }` is preferred over repeating `font-family: var(--font-display)` and the same heading tracking in every card, board, and footer title rule.
 
 -  I want rules regarding artchitecture, that abstraction should be created as a reusable module, and being deteministic, even if there is littl ebut more code repeated for the same featue.
-
+- https://chatgpt.com/share/69eca650-3328-832e-b017-382f1d3fc5ab
 
 -----
 - ## Translation rules
