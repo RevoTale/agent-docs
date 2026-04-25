@@ -18,3 +18,12 @@ css cardRoot() {
   Example: `class={ DisplayHeading(), cardTitle() }` is preferred over repeating `font-family: var(--font-display)` and the same heading tracking in every card, board, and footer title rule.
 
 -  I want rules regarding artchitecture, that abstraction should be created as a reusable module, and being deteministic, even if there is littl ebut more code repeated for the same featue.
+
+
+-----
+- ## Translation rules
+- Translate UI copy by meaning and page context, not word-for-word.
+- Prefer natural product language in the target language over literal technical terms.
+- For Ukrainian, translate software “utility/utilities” as “інструмент/інструменти” unless the context specifically means a low-level system utility.
+- Avoid infinitive fragments for section descriptions when the English source implies an active subject. Example: “We are sharing code…” -> “Ми ділимося кодом…”, not “Ділитися кодом…”.
+- If an English source string is grammatically ambiguous, rewrite the English source first before translating other locales.
