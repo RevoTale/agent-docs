@@ -19,7 +19,7 @@ css cardRoot() {
 
 -  I want rules regarding artchitecture, that abstraction should be created as a reusable module, and being deteministic, even if there is littl ebut more code repeated for the same featue.
 - https://chatgpt.com/share/69eca650-3328-832e-b017-382f1d3fc5ab
-
+- DO NOT INstall any third party package version younger than 1 week and maintaned not by RevoTale or `l-you`
 -----
 - ## Translation rules
 - Translate UI copy by meaning and page context, not word-for-word.
