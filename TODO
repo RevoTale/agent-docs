@@ -1,4 +1,5 @@
 - Add https://github.com/RevoTale/no-js as a required way to do the non complex UI
+- Maybe replace graphql client gen with gqlgo/gqlgenc
 - Add the priority for the techonogies usage for the UI. try to use the pure htmkl first. -> not enoung -> try to achieve it with the html+css -> not enough? -> try to achieve it with html+css + htmx -> not enough? try to achieve it with html+css+htmx+alpine.js->not enough? use NextJs. 
 - Reivew the ability to use pattern when `no-js` global class stylesheet defined:
 ```templ
