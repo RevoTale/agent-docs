@@ -32,4 +32,3 @@ css cardRoot() {
 - Avoid infinitive fragments for section descriptions when the English source implies an active subject. Example: “We are sharing code…” -> “Ми ділимося кодом…”, not “Ділитися кодом…”.
 - If an English source string is grammatically ambiguous, rewrite the English source first before translating other locales.
 
-
