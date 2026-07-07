@@ -3,6 +3,23 @@
 - Dont use synamic variables for the Dockerfile/docker compose versioning to make Renovate and other tool better detect latest version
 - Prefer explicit versioning locking (e.g go-1.26.2-trixie over go-1.26)
 - Migrate to the https://pnpm.io as a default package manager back because they fix the speed issue by rewriting in RUst on v12
+- add the proper codex devcontainer mounting exmaple
+```
+{
+  "name": "project",
+  "image": "mcr.microsoft.com/devcontainers/base:debian-13",
+
+  "remoteUser": "vscode",
+
+  "containerEnv": {
+    "CODEX_HOME": "/home/vscode/.codex"
+  },
+
+  "mounts": [
+    "source=codex-home,target=/home/vscode/.codex,type=volume"
+  ]
+}
+```
 - Add the priority for the techonogies usage for the UI. try to use the pure htmkl first. -> not enoung -> try to achieve it with the html+css -> not enough? -> try to achieve it with html+css + htmx -> not enough? try to achieve it with html+css+htmx+alpine.js->not enough? use NextJs. 
 - Reivew the ability to use pattern when `no-js` global class stylesheet defined:
 ```templ
