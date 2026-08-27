@@ -9,6 +9,7 @@ Use this table as the single source of truth for module routing.
 | --- | --- | --- | --- |
 | common | Common baseline rules | modules/common/doc.md | always |
 | taskfile | Taskfile (go-task) workflows | modules/taskfile/doc.md | always |
+| nodejs | Node.js runtime and pnpm package manager | modules/nodejs/doc.md | `.node-version`, `.nvmrc`, or `pnpm-lock.yaml` exists, or `package.json` declares Node.js or pnpm tooling |
 | typescript | TypeScript | modules/typescript/doc.md | `tsconfig.json`, `tsconfig.*.json`, `*.ts`, or `*.tsx` exist |
 | react | React | modules/react/doc.md | `package.json` includes `react`, or `*.jsx` / `*.tsx` files exist |
 | nextjs | Next.js | modules/nextjs/doc.md | `next.config.js|mjs|ts`, `package.json` includes `next`, or `app/` route files exist |

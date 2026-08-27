@@ -28,7 +28,7 @@ tasks:
   fix:
     desc: Auto-fix lint issues
     cmds:
-      - bunx biome check --write --unsafe .
+      - pnpm exec biome check --write --unsafe .
 ```
 
 Example of correct composition:
@@ -38,7 +38,7 @@ tasks:
   biome:fix:
     desc: Fix files with Biome
     cmds:
-      - bunx biome check --write --unsafe .
+      - pnpm exec biome check --write --unsafe .
   fix:
     desc: Auto-fix all code quality issues
     cmds:

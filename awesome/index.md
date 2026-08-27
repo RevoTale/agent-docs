@@ -9,6 +9,7 @@ Rules:
 | key | awesome_file | scope |
 | --- | --- | --- |
 | go | ./go.md | Go runtime, backend services, Go templating, and Go GraphQL client |
+| javascript | ./javascript.md | JavaScript and TypeScript libraries published to npm |
 | auth | ./auth.md | Authentication, authorization, identity, OAuth2, OIDC, and policy enforcement |
 | react | ./react.md | React repositories and applications |
 | nextjs | ./nextjs.md | Next.js repositories and applications |
