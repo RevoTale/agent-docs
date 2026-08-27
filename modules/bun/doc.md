@@ -11,8 +11,10 @@ This module defines baseline engineering rules for Bun-based repositories and ap
 ```
 
 # Strict rules
-- MUST reuse shared baseline rules: [../../shared/js-biome-bun-core.md](../../shared/js-biome-bun-core.md).
+- MUST reuse shared baseline rules: [../../shared/js-biome-core.md](../../shared/js-biome-core.md).
 - MUST reuse shared conventions: [../../shared/biome-conventions.md](../../shared/biome-conventions.md).
+- MUST treat Bun as an explicit alternative to the default Node.js and pnpm stack.
+- MUST use Bun only when an existing repository already requires it or maintainers explicitly select it.
 - MUST use Bun as the only runtime and package manager.
 - MUST use `bun install` for dependency management.
 - MUST use `bun run` for project scripts.
@@ -22,4 +24,4 @@ This module defines baseline engineering rules for Bun-based repositories and ap
 
 # Working Agreements
 - MUST follow root interaction protocol from [../../AGENTS.md](../../AGENTS.md) before finalizing policy changes.
-- MUST ask for explicit `Accept` before allowing non-Bun runtime or package-manager exceptions.
+- MUST ask for explicit `Accept` before migrating an existing Bun repository to another runtime or package manager.

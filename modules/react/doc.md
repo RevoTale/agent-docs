@@ -8,19 +8,20 @@ This module defines baseline engineering rules for React repositories and applic
   package.json
   src/
   biome.json|biome.jsonc
-  bun.lock|bun.lockb
+  pnpm-lock.yaml
 ```
 
 # Strict rules
 - MUST read enforced utility/library choices from [../../awesome/react.md](../../awesome/react.md) before introducing, replacing, or removing React libraries.
 - MUST enforce `required` entries from [../../awesome/react.md](../../awesome/react.md) for matching capabilities.
-- MUST reuse shared baseline rules: [../../shared/js-biome-bun-core.md](../../shared/js-biome-bun-core.md).
+- MUST apply the Node.js and pnpm defaults from [../nodejs/doc.md](../nodejs/doc.md) unless a more specific runtime module applies.
+- MUST reuse shared baseline rules: [../../shared/js-biome-core.md](../../shared/js-biome-core.md).
 - MUST reuse shared conventions: [../../shared/biome-conventions.md](../../shared/biome-conventions.md).
 - MUST avoid plain `.js` files and use `.ts` / `.tsx` instead, including configs when possible.
-- MUST run React build, test, and development workflows through Bun or Taskfile (if there is some). 
+- MUST run React build, test, and development workflows through Taskfile and pnpm by default; a more specific runtime module MAY override the package-manager command.
 - SHOULD define components using functional component patterns.
 - SHOULD prefer one file per component.
-- MUST keep Bun lockfiles in source control.
+- MUST keep the selected package manager's lockfile in source control; use `pnpm-lock.yaml` for the default pnpm stack.
 - MUST ensure React changes pass `task validate` before merge.
 - MUST ensure React changes pass `task test` when the task exists.
 - SHOULD colocate component-specific helpers with their component when helpers are not shared.
