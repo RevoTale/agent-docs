@@ -12,8 +12,8 @@ This module defines the default Node.js runtime and pnpm package-management rule
 
 # Strict rules
 - MUST read and enforce matching choices from [../../awesome/javascript.md](../../awesome/javascript.md).
-- MUST use an [Active LTS Node.js release](https://nodejs.org/en/about/previous-releases) by default.
-- MAY use a Maintenance LTS release when compatibility requires it.
+- MUST prefer the [Current Node.js release](https://nodejs.org/en/about/previous-releases) when project dependencies, tooling, and runtime environments support it.
+- MUST use a supported LTS release when Current compatibility is not established or production stability requirements favor LTS.
 - MUST NOT use an end-of-life Node.js release.
 - MUST use [pnpm](https://pnpm.io/) as the default package manager and pin its exact version in a `package.json` field natively managed by Renovate.
 - MUST use the top-level [`packageManager`](https://docs.renovatebot.com/modules/manager/npm/) field until Renovate natively manages pnpm's preferred [`devEngines.packageManager`](https://pnpm.io/package_json#devenginespackagemanager) field.
