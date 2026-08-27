@@ -15,7 +15,8 @@ This module defines the default Node.js runtime and pnpm package-management rule
 - MUST use an [Active LTS Node.js release](https://nodejs.org/en/about/previous-releases) by default.
 - MAY use a Maintenance LTS release when compatibility requires it.
 - MUST NOT use an end-of-life Node.js release.
-- MUST use [pnpm](https://pnpm.io/) as the default package manager and pin its exact version in the `packageManager` field of `package.json`.
+- MUST use [pnpm](https://pnpm.io/) as the default package manager and pin its exact version in a `package.json` field natively managed by Renovate.
+- MUST use the top-level [`packageManager`](https://docs.renovatebot.com/modules/manager/npm/) field until Renovate natively manages pnpm's preferred [`devEngines.packageManager`](https://pnpm.io/package_json#devenginespackagemanager) field.
 - MUST commit `pnpm-lock.yaml` and use a frozen lockfile in CI.
 - MUST run package scripts through pnpm and expose repository workflows through Taskfile.
 - MUST use `tsdown` for JavaScript or TypeScript libraries published to npm.

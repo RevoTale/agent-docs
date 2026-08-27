@@ -21,7 +21,7 @@ This module defines baseline engineering rules for React repositories and applic
 - MUST run React build, test, and development workflows through Taskfile and pnpm by default; a more specific runtime module MAY override the package-manager command.
 - SHOULD define components using functional component patterns.
 - SHOULD prefer one file per component.
-- MUST keep `pnpm-lock.yaml` in source control.
+- MUST keep the selected package manager's lockfile in source control; use `pnpm-lock.yaml` for the default pnpm stack.
 - MUST ensure React changes pass `task validate` before merge.
 - MUST ensure React changes pass `task test` when the task exists.
 - SHOULD colocate component-specific helpers with their component when helpers are not shared.

@@ -21,7 +21,7 @@ This module defines baseline engineering rules for Next.js repositories and appl
 - MUST keep Next.js scripts executable through pnpm by default (`pnpm exec next dev`, `pnpm exec next build`, `pnpm exec next start`); a more specific runtime module MAY provide equivalent commands.
 - SHOULD allow Taskfile workflows to wrap Next.js scripts for repository-level orchestration.
 - MUST keep `task validate` limited to Biome checks for Next.js repositories.
-- MUST keep `pnpm-lock.yaml` in source control.
+- MUST keep the selected package manager's lockfile in source control; use `pnpm-lock.yaml` for the default pnpm stack.
 - MUST avoid plain `.js` files and use `.ts` / `.tsx` instead, including configs when possible.
 - MUST use App Router (`app/`) and MUST NOT introduce `pages/`.
 - MUST ensure Next.js changes pass `task validate` before merge.
