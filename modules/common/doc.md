@@ -9,6 +9,7 @@ This module defines baseline rules that apply to every repository regardless of 
 
 # Strict rules
 - MUST reuse Taskfile workflow rules for all projects: [../taskfile/doc.md](../taskfile/doc.md).
+- MUST follow the organization-wide OS and base image selection policy: [shared/os-and-base-images.md](../../shared/os-and-base-images.md).
 - MUST use Taskfile as the default workflow runner across modules.
 - MUST keep this module scoped to repository-wide baseline rules only; stack-specific rules belong in stack modules.
 - MUST require `task validate` to pass before merge.
