@@ -17,7 +17,7 @@ This module defines baseline engineering rules for Go repositories and services.
 - MUST enforce a maximum line length of 120 characters through golangci-lint configuration.
 - SHOULD prefer patterns from `100 Go Mistakes and How to Avoid Them`: https://github.com/teivah/100-go-mistakes.
 - MUST configure the `lll` linter in golangci-lint with line length set to 120.
-- MUST enable `govet` and `staticcheck` in golangci-lint. Enable `gofmt` under `formatters.enable` with `formatters.settings.gofmt.simplify: false` to match plain gofmt.
+- MUST enable `govet` and `staticcheck` in golangci-lint. Enable `gofmt` under `formatters.enable` with its default settings.
 - MUST require `task validate` and `task test` to pass before merge. Run the following commands from each Go module or use an explicit equivalent scope covering all project packages.
 - MUST run `go build ./...`, `golangci-lint run ./...`, and `govulncheck ./...` in `task validate`. Pin govulncheck in CI and shared development tooling. Validation must report formatting differences without applying fixes.
 - MUST use `golangci-lint fmt ./...` in `task fix` to apply the same formatter locally.
