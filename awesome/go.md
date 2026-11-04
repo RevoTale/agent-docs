@@ -9,4 +9,5 @@ Enforced utility/library choices for Go stacks.
 | migrations | required | github.com/ariga/atlas | https://github.com/ariga/atlas | Default schema migration and database linting tool for Go repositories. |
 | test-assertions | required | github.com/stretchr/testify | https://github.com/stretchr/testify | Default assertion and mocking toolkit for Go tests. |
 | geoip-reader | required | github.com/oschwald/geoip2-golang | https://github.com/oschwald/geoip2-golang | Default MaxMind GeoIP2 and GeoLite2 database reader. |
+| vulnerability-scanning | required | golang.org/x/vuln/cmd/govulncheck | https://go.dev/doc/security/vuln/ | Check for known vulnerabilities reachable from Go code. |
 | go-patterns-reference | preferred | github.com/teivah/100-go-mistakes | https://github.com/teivah/100-go-mistakes | Preferred reference for idiomatic Go pitfalls and clean patterns. |
