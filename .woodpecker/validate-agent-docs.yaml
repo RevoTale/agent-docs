@@ -1,0 +1,9 @@
+when:
+  - event: [push, pull_request]
+
+steps:
+  - name: validate-agent-docs
+    image: ghcr.io/revotale/ci/base:v0.1.8@sha256:c59b01e74acd309c9c775f594917df6d9f8cad93fdfa7f40408aebeb5140f414
+    commands:
+      - go test ./scripts/validate-agent-docs.go ./scripts/validate-agent-docs_test.go
+      - go run ./scripts/validate-agent-docs.go
