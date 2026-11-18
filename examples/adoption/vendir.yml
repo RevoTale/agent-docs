@@ -1,0 +1,19 @@
+apiVersion: vendir.k14s.io/v1alpha1
+kind: Config
+directories:
+  - path: .revotale-agent-doc
+    contents:
+      - path: .
+        git:
+          url: https://github.com/RevoTale/agent-docs.git
+          ref: REPLACE_WITH_REVIEWED_COMMIT_SHA
+          skipInitSubmodules: true
+        includePaths:
+          - modules/common/doc.md
+          - modules/taskfile/doc.md
+          - modules/go/doc.md
+          - shared/dependency-management.md
+          - shared/os-and-base-images.md
+          - awesome/go.md
+        legalPaths:
+          - LICENSE

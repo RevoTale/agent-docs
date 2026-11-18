@@ -1,92 +1,41 @@
-# RevoTale Agent Docs
+# RevoTale engineering standard
 
-Central source for shared AGENTS policies of [RevoTale](https://revotale.com).
+This is the engineering standard for RevoTale projects. People and coding agents read the same Markdown. Each project keeps the part it uses in Git under `.revotale-agent-doc/`. Its root `AGENTS.md` links directly to those files and names the project's validation commands.
 
-## Source of Truth
+## Use it in a project
 
-- `AGENTS.md` and `doc.md` are the only policy sources of truth.
-- `skills/` contains operational workflows that must consume those sources of truth rather than redefine them.
-- `README.md` is an informative mirror and must stay aligned with those files.
+- **Start a project.** Choose the architecture from the product requirements. Select the baseline, the modules for each app or service, and the library choices for the capabilities it needs. Apply the standard from the first change.
+- **Adopt it in an existing project.** Identify the current architecture, the intended architecture and the work in scope. New work follows the selected rules within its boundary. Record a gap when meeting a rule requires a wider migration. Agree on that migration before changing runtimes, tools or public behavior.
+- **Make a change.** Start in the nearest applicable `AGENTS.md`. Read the local rules for the decision at hand, make the change and run the project's checks. Reopen the affected rule when the task changes scope, the result conflicts with a rule or context is lost.
 
-## Repository Layout
+The [adoption guide](examples/adoption/README.md) walks through a Go service, including its vendir configuration, project bootstrap and upgrade from the earlier remote links. The optional [apply-agent-docs skill](skills/apply-agent-docs/SKILL.md) guides selection and migration.
 
-- `AGENTS.md`: repository-level policy contract.
-- `doc.md`: canonical module registry, routing logic, and merge contract.
-- `awesome/index.md`: entrypoint for enforced utility/library choices by stack or capability.
-- `awesome/<name>.md`: stack-specific or capability-specific enforced utility/library lists.
-- `shared/<rule-name>.md`: reusable cross-stack rulesets referenced by modules.
-- `modules/common/doc.md`: always-loaded baseline module.
-- `modules/<stack>/doc.md`: stack-specific modules.
-- `skills/<skill-name>/SKILL.md`: operational skills for greenfield init, AGENTS refresh, and guided refactors.
+## Choose the modules
 
-## Nested AGENTS.md
+Select modules per app, service or package. Manifests and lockfiles identify the current stack. For a new boundary, use the agreed target. Keep repository-wide guidance in the root bootstrap and add a nested bootstrap where the rules differ.
 
-Target repositories may use a root `AGENTS.md` plus nested `AGENTS.md` files when different subprojects need more specific stack rules.
+| Module | When it applies |
+| --- | --- |
+| [common](modules/common/doc.md) | Every project. Includes OS, base image and dependency policies. |
+| [taskfile](modules/taskfile/doc.md) | Every project. Defines the shared task interface. |
+| [nodejs](modules/nodejs/doc.md) | New JavaScript-family projects by default, and boundaries using Node.js with pnpm. |
+| [bun](modules/bun/doc.md) | Boundaries using Bun, or new ones with an approved Bun exception. |
+| [typescript](modules/typescript/doc.md) | TypeScript source or compiler configuration. Select the runtime separately. |
+| [react](modules/react/doc.md) | React components or a React dependency. Include TypeScript. |
+| [nextjs](modules/nextjs/doc.md) | A Next.js app. Include React, TypeScript and the applicable runtime. |
+| [go](modules/go/doc.md) | A Go service, module or workspace. |
+| [templ](modules/templ/doc.md) | Go code rendering HTML with templ. Include Go and the paired templ examples. |
 
-Example:
+Use the [library registry](awesome/index.md) for choices that depend on a capability, such as authentication or publishing to npm. A required entry applies when the project uses that capability. Include the selected registry files and local documents linked by the selected modules. The central catalog and contributor instructions stay here.
 
-```text
-<repo-root>/
-  AGENTS.md
-  frontend/
-    AGENTS.md
-    package.json
-  backend/
-    AGENTS.md
-    go.mod
-```
+## Apply a rule
 
-Use nested files for meaningful architecture boundaries such as apps, services, or packages with distinct tooling. The nearest `AGENTS.md` should apply to the active subtree, while parent files stay additive for shared rules.
+A rule applies within its stated scope. A narrower rule resolves a conflict with a general default. Record an approved exception in the affected project's bootstrap with its scope and reason. When two applicable requirements still conflict, bring that decision to the maintainer before making the affected change.
 
-## Skill Workflows
+Read paired examples when distinguishing two implementations is difficult. Put mechanically enforceable requirements in the project's checks where practical. Review covers architectural choices that require judgment.
 
-Use the skill that matches the repository stage.
+## Update a project's copy
 
-### Greenfield Init
+Choose a reviewed revision, sync the selected files, and review the diff together with the lockfile and bootstrap. Ordinary work reads the committed copy offline. The revision identifies the source bytes. Review establishes whether changes to those instructions are appropriate for the project.
 
-Skill path: `skills/init-project-from-agent-docs/SKILL.md`
-
-Example request:
-`Use https://github.com/RevoTale/agent-docs/skills/init-project-from-agent-docs skill to design the initial root and nested AGENTS.md files for this new repository.`
-
-### Existing Repo AGENTS Refresh
-
-Skill path: `skills/refresh-project-agents-from-agent-docs/SKILL.md`
-
-Example request:
-`Use https://github.com/RevoTale/agent-docs/skills/refresh-project-agents-from-agent-docs skill to refresh the root and nested AGENTS.md files for this repository.`
-
-### Existing Repo Refactor
-
-Skill path: `skills/refactor-project-to-agent-docs/SKILL.md`
-
-Example request:
-`Use https://github.com/RevoTale/agent-docs/skills/refactor-project-to-agent-docs skill to align this repository and its nested subprojects with the recommended stack after an architecture interview.`
-
-## Update Manually
-
-You can still update `AGENTS.md` manually when automation is not desired.
-
-1. Create a root `AGENTS.md` if missing.
-2. Add `https://github.com/RevoTale/agent-docs/blob/main/doc.md` under `Base Policy Links (Load First)`.
-3. Add `https://github.com/RevoTale/agent-docs/blob/main/modules/common/doc.md` under `Base Policy Links (Load First)`.
-4. Add `https://github.com/RevoTale/agent-docs/blob/main/modules/taskfile/doc.md` under `Base Policy Links (Load First)`.
-5. Add `https://github.com/RevoTale/agent-docs/blob/main/awesome/index.md` under `Base Policy Links (Load First)`.
-6. Add matching stack module links from `modules/<stack>/doc.md` based on router conditions.
-7. Add repository-specific rules under `Local Details`.
-
-## Root `AGENTS.md` Example
-
-```md
-# Overview
-Payments service API.
-
-# Base Policy Links (Load First)
-- https://github.com/RevoTale/agent-docs/blob/main/doc.md
-- https://github.com/RevoTale/agent-docs/blob/main/modules/common/doc.md
-- https://github.com/RevoTale/agent-docs/blob/main/modules/taskfile/doc.md
-- https://github.com/RevoTale/agent-docs/blob/main/awesome/index.md
-
-# Local Details
-- Add repository-specific constraints and local working agreements.
-```
+For changes to the standard itself, read the [maintainer guide](AGENTS.md).

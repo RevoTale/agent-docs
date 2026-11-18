@@ -3,187 +3,113 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
-func writeTempFile(t *testing.T, relPath string, content string) string {
+func put(t *testing.T, root, name, body string) {
 	t.Helper()
-
-	dir := t.TempDir()
-	path := filepath.Join(dir, relPath)
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-		t.Fatalf("failed to create temp dir: %v", err)
+	name = filepath.Join(root, filepath.FromSlash(name))
+	if err := os.MkdirAll(filepath.Dir(name), 0o755); err != nil {
+		t.Fatal(err)
 	}
-	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
-		t.Fatalf("failed to write temp file: %v", err)
+	if err := os.WriteFile(name, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
 	}
-
-	return path
 }
 
-func writeTempDoc(t *testing.T, content string) string {
+func fixture(t *testing.T, snapshot bool) string {
 	t.Helper()
-
-	return writeTempFile(t, "doc.md", content)
-}
-
-func TestCheckNormativeBulletsPassesForMustBullets(t *testing.T) {
-	path := writeTempDoc(t, `# Strict rules
-- MUST keep this deterministic.
-`)
-
-	v := &validator{}
-	checkNormativeBullets(v, path, sectionStrictRules)
-
-	if len(v.failures) != 0 {
-		t.Fatalf("expected no failures, got: %v", v.failures)
+	root := t.TempDir()
+	put(t, root, "modules/common/doc.md", "# Common\nUse [Taskfile](../taskfile/doc.md#commands) and [OS defaults][os].\n[os]: ../../shared/os.md\n")
+	put(t, root, "modules/taskfile/doc.md", "# Taskfile\nUse the [tool](https://taskfile.dev).\n")
+	put(t, root, "shared/os.md", "# OS\n```md\n[Literal example](missing.md)\n```\n")
+	put(t, root, "LICENSE", "An upstream license.\n")
+	if !snapshot {
+		put(t, root, "README.md", "| [common](modules/common/doc.md) | Always |\n| [taskfile](modules/taskfile/doc.md) | Always |\n")
+		put(t, root, "awesome/index.md", "| auth | [Auth](./auth.md) | Identity |\n")
+		put(t, root, "awesome/auth.md", "| capability | status | package |\n| --- | --- | --- |\n| identity | required | kratos |\n")
+		put(t, root, skillPath, "---\nname: apply-agent-docs\ndescription: Select and update the project standard.\n---\nRead the catalog.\n")
 	}
+	return root
 }
 
-func TestCheckNormativeBulletsFailsForNonNormativeBullets(t *testing.T) {
-	path := writeTempDoc(t, `# Strict rules
-- Keep this deterministic.
-`)
-
-	v := &validator{}
-	checkNormativeBullets(v, path, sectionStrictRules)
-
-	if len(v.failures) == 0 {
-		t.Fatalf("expected at least one failure, got none")
+func TestCompleteStandardAndSelectedSnapshot(t *testing.T) {
+	for _, snapshot := range []bool{false, true} {
+		if got := validate(fixture(t, snapshot), snapshot); len(got) != 0 {
+			t.Errorf("snapshot=%t: %v", snapshot, got)
+		}
 	}
 }
 
-func TestCheckWorkingAgreementSemanticsRejectsTechnicalCommand(t *testing.T) {
-	path := writeTempDoc(t, `# Working Agreements
-- MUST follow root protocol.
-- MUST run task validate before finalizing.
-`)
-
-	v := &validator{}
-	checkWorkingAgreementSemantics(v, path)
-
-	if len(v.failures) == 0 {
-		t.Fatalf("expected technical command failure, got none")
+func TestValidatingSnapshotErrors(t *testing.T) {
+	cases := []struct {
+		name    string
+		mutate  func(*testing.T, string)
+		wantErr string
+	}{
+		{"missing reference definition destination", func(t *testing.T, root string) {
+			if err := os.Remove(filepath.Join(root, "shared/os.md")); err != nil {
+				t.Fatal(err)
+			}
+		}, "missing consumer document"},
+		{"outside root", func(t *testing.T, root string) {
+			put(t, root, "shared/os.md", "[read](../../AGENTS.md)")
+		}, "missing consumer document"},
+		{"unsupported URL", func(t *testing.T, root string) {
+			put(t, root, "shared/os.md", "[read](file:///etc/hosts)")
+		}, "expected a relative policy link"},
+		{"symlink directory", func(t *testing.T, root string) {
+			target := t.TempDir()
+			put(t, target, "hidden.md", "# Hidden\n")
+			if err := os.Symlink(target, filepath.Join(root, "shared/alias")); err != nil {
+				t.Fatal(err)
+			}
+			put(t, root, "shared/os.md", "[read](alias/hidden.md)")
+		}, "regular, non-executable file"},
+		{"executable markdown", func(t *testing.T, root string) {
+			if err := os.Chmod(filepath.Join(root, "shared/os.md"), 0o755); err != nil {
+				t.Fatal(err)
+			}
+		}, "regular, non-executable file"},
+		{"central author instructions", func(t *testing.T, root string) {
+			put(t, root, "AGENTS.md", "# Maintainers\n")
+		}, "outside the consumer documentation layout"},
+		{"nested skill", func(t *testing.T, root string) {
+			put(t, root, "shared/nested/SKILL.md", "# Skill\n")
+		}, "outside the consumer documentation layout"},
+		{"missing baseline", func(t *testing.T, root string) {
+			if err := os.Remove(filepath.Join(root, "modules/common/doc.md")); err != nil {
+				t.Fatal(err)
+			}
+		}, "baseline module required"},
+		{"missing license", func(t *testing.T, root string) {
+			if err := os.Remove(filepath.Join(root, "LICENSE")); err != nil {
+				t.Fatal(err)
+			}
+		}, "include the upstream license"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			root := fixture(t, true)
+			tc.mutate(t, root)
+			if got := strings.Join(validate(root, true), "\n"); !strings.Contains(got, tc.wantErr) {
+				t.Errorf("expected %q, got %q", tc.wantErr, got)
+			}
+		})
 	}
 }
 
-func TestParseAwesomeRegistryPaths(t *testing.T) {
-	path := writeTempDoc(t, `# Awesome Registry
-| stack_key | awesome_file | scope |
-| --- | --- | --- |
-| go | [go.md](./go.md) | go stack |
-| react | [react.md](./react.md) | react stack |
-`)
-
-	paths, err := parseAwesomeRegistryPaths(path)
-	if err != nil {
-		t.Fatalf("unexpected parse error: %v", err)
-	}
-
-	if len(paths) != 2 {
-		t.Fatalf("expected 2 awesome paths, got %d (%v)", len(paths), paths)
-	}
-
-	if paths[0] != filepath.Clean("awesome/go.md") {
-		t.Fatalf("unexpected first path: %s", paths[0])
-	}
-
-	if paths[1] != filepath.Clean("awesome/react.md") {
-		t.Fatalf("unexpected second path: %s", paths[1])
-	}
-}
-
-func TestParseSkillDocParsesFrontmatter(t *testing.T) {
-	path := writeTempFile(t, "skills/init-project-from-agent-docs/SKILL.md", `---
-name: init-project-from-agent-docs
-description: Initialize a repository from intent.
----
-
-# Skill
-Interview the user first.
-`)
-
-	doc, err := parseSkillDoc(path)
-	if err != nil {
-		t.Fatalf("unexpected parse error: %v", err)
-	}
-
-	if doc.name != "init-project-from-agent-docs" {
-		t.Fatalf("unexpected skill name: %s", doc.name)
-	}
-
-	if doc.description != "Initialize a repository from intent." {
-		t.Fatalf("unexpected skill description: %s", doc.description)
-	}
-}
-
-func TestCheckSkillFileRejectsDeprecatedRouterReference(t *testing.T) {
-	path := writeTempFile(t, "skills/refresh-project-agents-from-agent-docs/SKILL.md", `---
-name: refresh-project-agents-from-agent-docs
-description: Refresh AGENTS for an existing repository.
----
-
-# Skill
-
-Use repository signals and ask for Accept.
-Load AGENTS.router.md before matching modules.
-`)
-
-	v := &validator{}
-	checkSkillFile(v, path)
-
-	if len(v.failures) == 0 {
-		t.Fatalf("expected stale router reference failure, got none")
-	}
-}
-
-func TestCheckSkillFileRequiresInterviewForInitSkill(t *testing.T) {
-	path := writeTempFile(t, "skills/init-project-from-agent-docs/SKILL.md", `---
-name: init-project-from-agent-docs
-description: Initialize a repository from intent.
----
-
-# Skill
-
-Ask for explicit Accept before writing files.
-`)
-
-	v := &validator{}
-	checkSkillFile(v, path)
-
-	if len(v.failures) == 0 {
-		t.Fatalf("expected interview requirement failure, got none")
-	}
-}
-
-func TestCheckRequiredSubstringsFailsWhenTextIsMissing(t *testing.T) {
-	path := writeTempDoc(t, `# Overview
-Root policy only.
-`)
-
-	v := &validator{}
-	checkRequiredSubstrings(v, path, "nested `AGENTS.md`")
-
-	if len(v.failures) == 0 {
-		t.Fatalf("expected required substring failure, got none")
-	}
-}
-
-func TestCheckSkillFileRequiresNestedSupportForRefreshSkill(t *testing.T) {
-	path := writeTempFile(t, "skills/refresh-project-agents-from-agent-docs/SKILL.md", `---
-name: refresh-project-agents-from-agent-docs
-description: Refresh AGENTS for an existing repository.
----
-
-# Skill
-
-Use repository signals and ask for explicit Accept before writing files.
-`)
-
-	v := &validator{}
-	checkSkillFile(v, path)
-
-	if len(v.failures) == 0 {
-		t.Fatalf("expected nested support failure, got none")
+func TestInvalidCatalog(t *testing.T) {
+	root := fixture(t, false)
+	put(t, root, "modules/react/doc.md", "# React\n")
+	put(t, root, "awesome/react.md", "| CSS | required | Tailwind |\n| testing | default | testtool |\n")
+	put(t, root, "awesome/index.md", "| one | ./auth.md |\n| two | ./auth.md |\n")
+	put(t, root, skillPath, "---\nname: old-name\ndescription: Select a snapshot.\n---\nA workflow.\n")
+	got := strings.Join(validate(root, false), "\n")
+	for _, problem := range []string{"module missing from catalog", "library list missing from catalog", "expected one entry", "invalid library status", "matching name"} {
+		if !strings.Contains(got, problem) {
+			t.Errorf("expected %q, got %q", problem, got)
+		}
 	}
 }

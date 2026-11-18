@@ -1,6 +1,3 @@
-# Overview
-Reusable conventions for Biome-based repositories.
+# Biome configuration
 
-# Conventions
-- Keep Biome configuration in `biome.json`.
-- Remove or avoid `.eslintrc*`, `eslint.config.*`, and `.prettierrc*`.
+Keep the project configuration in `biome.json`. Remove legacy ESLint and Prettier configuration files when adopting Biome, including `.eslintrc*`, `eslint.config.*`, and `.prettierrc*`. Use Biome as the project's sole linter and formatter.

@@ -1,4 +1,5 @@
-# Awesome: React
+# React library choices
+
 Enforced utility/library choices for React stacks.
 
 | capability | status | package | source | notes |

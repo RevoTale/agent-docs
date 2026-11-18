@@ -1,10 +1,5 @@
-# Overview
-Reusable Biome baseline for JavaScript-family stacks.
+# Biome checks
 
-# Core Behaviors & Patterns
-- MUST use Biome as the linter and formatter: https://biomejs.dev/.
-- MUST set `linter.rules.preset` to `all` so every stable rule is enabled.
-- MUST NOT enable nursery rules globally because they are not covered by Biome semantic-versioning guarantees.
-- MUST make Biome warnings fail validation, for example with `biome check --error-on-warnings .`.
-- MUST keep suppressions local and explain why the rule does not apply.
-- MUST NOT use ESLint or Prettier.
+Use [Biome](https://biomejs.dev/) as the JavaScript-family linter and formatter. Configure `linter.rules.preset` as `all` to enable stable rules. Keep global nursery rules disabled because they fall outside Biome's semantic-versioning guarantees.
+
+Make warnings fail validation with `biome check --error-on-warnings .` or its equivalent. Keep suppressions local and explain why the rule does not apply.

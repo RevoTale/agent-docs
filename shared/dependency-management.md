@@ -1,19 +1,14 @@
-# Overview
-This policy defines dependency freshness, Renovate configuration, and directly discoverable container image versions.
+# Dependencies and Renovate
 
-# Strict rules
-- MUST NOT install a third-party dependency release until seven days after publication.
-- MAY use releases maintained by RevoTale or `l-you` without the seven-day delay.
-- MUST obtain explicit user `Accept` and document the reason before any other quarantine exception.
-- MUST configure package-manager enforcement when supported. For pnpm, set [`minimumReleaseAge: 10080`](https://pnpm.io/settings/dependency-resolution#minimumreleaseage) and `minimumReleaseAgeIgnoreMissingTime: false` in `pnpm-workspace.yaml`; add only verified RevoTale and `l-you` packages or scopes to `minimumReleaseAgeExclude`.
-- MUST keep a root `renovate.json` in every target repository with [`extends: ["local>RevoTale/.github:renovate-config"]`](https://docs.renovatebot.com/config-presets/).
-- MUST NOT duplicate organization-wide Renovate rules locally without a repository-specific reason.
-- MUST write container image tags or digests directly in Dockerfiles, Compose files, devcontainer configuration, and CI configuration so standard dependency managers can discover them.
-- MUST prefer the most specific supported image tag with its digest instead of a floating tag, for example `<image>:1.2.3@sha256:<digest>`.
-- MUST NOT hide container image versions behind build arguments or environment variables.
-- MUST NOT add custom Renovate managers or annotations solely to update an indirect container image version.
+## Third-party release age
 
-Use this minimal target-repository configuration:
+Wait seven days after publication before installing a third-party dependency release. Releases maintained by RevoTale or `l-you` may be used immediately. Any other exception requires explicit maintainer approval and a documented reason.
+
+Configure enforcement when the package manager supports it. For pnpm, set [`minimumReleaseAge: 10080`](https://pnpm.io/settings/dependency-resolution#minimumreleaseage) and `minimumReleaseAgeIgnoreMissingTime: false` in `pnpm-workspace.yaml`. Limit `minimumReleaseAgeExclude` to verified RevoTale and `l-you` packages or scopes.
+
+## Renovate preset
+
+Keep the following configuration at the repository root in `renovate.json`. Extend the [organization preset](https://docs.renovatebot.com/config-presets/) locally only when a project-specific requirement calls for it.
 
 ```json
 {
@@ -21,3 +16,7 @@ Use this minimal target-repository configuration:
   "extends": ["local>RevoTale/.github:renovate-config"]
 }
 ```
+
+## Container references
+
+Write image tags or digests directly in Dockerfiles, Compose files, Dev Container configuration, and CI. Prefer the most specific supported tag with its digest, such as `<image>:1.2.3@sha256:<digest>`. Renovate can discover these references directly. Keep image versions out of build arguments and environment variables, and avoid custom managers or annotations solely to track indirect versions.

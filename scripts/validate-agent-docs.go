@@ -1,585 +1,326 @@
 package main
 
 import (
-	"bufio"
+	"flag"
 	"fmt"
+	"io/fs"
+	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
-	"sort"
+	"slices"
 	"strings"
+	"unicode/utf8"
 )
 
-const (
-	routerDocPath    = "doc.md"
-	rootPolicyPath   = "AGENTS.md"
-	moduleDocGlob    = "modules/*/doc.md"
-	moduleLegacyGlob = "modules/*/AGENTS.md"
-	awesomeIndexPath = "awesome/index.md"
-	awesomeDocGlob   = "awesome/*.md"
-	skillsDirPath    = "skills"
-	skillDocGlob     = "skills/*/SKILL.md"
-
-	sectionStrictRules      = "Strict rules"
-	sectionWorkingAgreement = "Working Agreements"
-
-	scannerInitialCapacity = 64 * 1024
-	scannerMaxCapacity     = 1024 * 1024
-)
+const skillPath = "skills/apply-agent-docs/SKILL.md"
 
 var (
-	headingPattern      = regexp.MustCompile(`^(#{1,6})\s+(.+)$`)
-	bulletPattern       = regexp.MustCompile(`^\s*-\s+`)
-	normativeBullet     = regexp.MustCompile(`^\s*-\s+(MUST|SHOULD|MAY)(\s|$)`)
-	registryRowPattern  = regexp.MustCompile(`^\|\s*[^|]+\|\s*[^|]+\|\s*modules/[^|]+\|`)
-	awesomeRowPattern   = regexp.MustCompile(`^\|\s*[^|]+\|\s*(\[[^]]+\]\([^)]*\.md\)|\.?/?.*\.md)\s*\|`)
-	awesomeStatusRow    = regexp.MustCompile(`^\|\s*[^|]+\|\s*(required|preferred|banned)\s*\|`)
-	skillNamePattern    = regexp.MustCompile(`^name:\s*(.+?)\s*$`)
-	skillDescPattern    = regexp.MustCompile(`^description:\s*(.+?)\s*$`)
-	waForbiddenPatterns = []*regexp.Regexp{
-		regexp.MustCompile(`(?i)task\s+(gen(:check|:code-diff)?|fix|validate|test)(\s|$)`),
-		regexp.MustCompile(`(?i)bun\s+(run|install)(\s|$)`),
-		regexp.MustCompile(`(?i)go\s+test(\s|$)`),
-		regexp.MustCompile(`(?i)golangci-lint`),
-		regexp.MustCompile(`(?i)gofmt`),
-		regexp.MustCompile(`(?i)tsc(\s|$)`),
-		regexp.MustCompile(`(?i)must\s+pass`),
-		regexp.MustCompile(`(?i)before\s+merge`),
-	}
-	expectedTopLevelSections = []string{
-		"Overview",
-		"Project structure",
-		sectionStrictRules,
-		"Working Agreements",
-	}
+	moduleRow = regexp.MustCompile(`^\|\s*\[([^]]+)\]\((modules/[^)]+)\)\s*\|`)
+	// Policy references use inline Markdown links or single-line reference definitions.
+	inlineLink = regexp.MustCompile(`\]\(\s*(?:<([^>]+)>|([^\s)]+))`)
+	definition = regexp.MustCompile(`^\s{0,3}\[[^]]+\]:\s*(?:<([^>]+)>|(\S+))`)
 )
 
-type validator struct {
+type checker struct {
+	root     string
+	docs     map[string]string
 	failures []string
 }
 
-type skillDoc struct {
-	name        string
-	description string
-	body        string
+func (c *checker) fail(name, message string, args ...any) {
+	c.failures = append(c.failures, name+": "+fmt.Sprintf(message, args...))
 }
 
-func (v *validator) failf(format string, args ...any) {
-	v.failures = append(v.failures, fmt.Sprintf(format, args...))
+func (c *checker) read(name string) string {
+	data, err := os.ReadFile(filepath.Join(c.root, filepath.FromSlash(name)))
+	if err != nil {
+		c.fail(name, "%v", err)
+		return ""
+	}
+	if !utf8.Valid(data) || strings.TrimSpace(string(data)) == "" {
+		c.fail(name, "expected non-empty UTF-8 text")
+	}
+	return string(data)
 }
 
-func (v *validator) report() error {
-	if len(v.failures) == 0 {
+func policyPath(name string) bool {
+	if path.Ext(name) != ".md" || name == "awesome/index.md" {
+		return false
+	}
+	if base := path.Base(name); base == "AGENTS.md" || base == "SKILL.md" {
+		return false
+	}
+	parts := strings.Split(name, "/")
+	for _, part := range parts {
+		if strings.HasPrefix(part, ".") {
+			return false
+		}
+	}
+	switch parts[0] {
+	case "modules", "examples":
+		return len(parts) >= 3
+	case "shared", "awesome":
+		return len(parts) >= 2
+	default:
+		return false
+	}
+}
+
+// Walk without following links. Validate destinations against the resulting set
+// of regular documents, so a link cannot enter an unselected module or symlink.
+func (c *checker) collect(snapshot bool) {
+	err := fs.WalkDir(os.DirFS(c.root), ".", func(name string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !snapshot {
+			top, _, _ := strings.Cut(name, "/")
+			switch top {
+			case ".", "modules", "awesome", "shared", "examples":
+			default:
+				if entry.IsDir() {
+					return fs.SkipDir
+				}
+				return nil
+			}
+			if name == "awesome/index.md" || name == "examples/pattern-anti-pattern.md" {
+				return nil
+			}
+			// Other example folders can hold adoption guides and downstream project fixtures.
+			if strings.HasPrefix(name, "examples/") {
+				fields := strings.Split(name, "/")
+				if _, err := os.Lstat(filepath.Join(c.root, "modules", fields[1], "doc.md")); err != nil {
+					if entry.IsDir() {
+						return fs.SkipDir
+					}
+					return nil
+				}
+			}
+		}
+		if entry.IsDir() {
+			return nil
+		}
+		info, err := entry.Info()
+		if err != nil {
+			return err
+		}
+		if !info.Mode().IsRegular() || info.Mode().Perm()&0o111 != 0 {
+			c.fail(name, "expected a regular, non-executable file")
+			return nil
+		}
+		if snapshot && name == "LICENSE" {
+			return nil
+		}
+		if !policyPath(name) {
+			c.fail(name, "outside the consumer documentation layout")
+			return nil
+		}
+		c.docs[name] = c.read(name)
 		return nil
-	}
-
-	for _, failure := range v.failures {
-		fmt.Fprintf(os.Stderr, "ERROR: %s\n", failure)
-	}
-	return fmt.Errorf("validation failed with %d error(s)", len(v.failures))
-}
-
-func readLines(path string) ([]string, error) {
-	file, err := os.Open(path)
+	})
 	if err != nil {
-		return nil, err
+		c.fail(c.root, "%v", err)
 	}
-	defer file.Close()
-
-	lines := make([]string, 0, 128)
-	scanner := bufio.NewScanner(file)
-	scanner.Buffer(make([]byte, scannerInitialCapacity), scannerMaxCapacity)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-
-	return lines, nil
 }
 
-func parseHeading(line string) (level int, title string, ok bool) {
-	matches := headingPattern.FindStringSubmatch(line)
-	if matches == nil {
-		return 0, "", false
-	}
-
-	return len(matches[1]), strings.TrimSpace(matches[2]), true
-}
-
-func extractSection(lines []string, title string) ([]string, bool) {
-	inSection := false
-	sectionLines := make([]string, 0, 32)
-
-	for _, line := range lines {
-		_, headingTitle, isHeading := parseHeading(line)
-		if isHeading {
-			if inSection {
-				break
-			}
-			if headingTitle == title {
-				inSection = true
+func proseLines(body string, visit func(int, string)) {
+	var fence string
+	for i, line := range strings.Split(body, "\n") {
+		trim := strings.TrimSpace(line)
+		if fence != "" {
+			if strings.HasPrefix(trim, fence) && strings.Trim(trim, fence[:1]) == "" {
+				fence = ""
 			}
 			continue
 		}
-		if inSection {
-			sectionLines = append(sectionLines, line)
+		if strings.HasPrefix(trim, "```") || strings.HasPrefix(trim, "~~~") {
+			fence = trim[:len(trim)-len(strings.TrimLeft(trim, trim[:1]))]
+			continue
 		}
+		visit(i+1, line)
 	}
-
-	return sectionLines, inSection
 }
 
-func parseRegistryPaths(path string) ([]string, error) {
-	lines, err := readLines(path)
+func destination(groups []string) string {
+	if groups[1] != "" {
+		return groups[1]
+	}
+	return groups[2]
+}
+
+func (c *checker) checkLink(name string, line int, dest string) {
+	u, err := url.Parse(dest)
 	if err != nil {
-		return nil, err
-	}
-
-	paths := make([]string, 0, 16)
-	for _, line := range lines {
-		trimmed := strings.TrimSpace(line)
-		if !registryRowPattern.MatchString(trimmed) {
-			continue
-		}
-
-		parts := strings.Split(trimmed, "|")
-		if len(parts) < 5 {
-			continue
-		}
-
-		modulePath := strings.TrimSpace(parts[3])
-		if modulePath == "" {
-			continue
-		}
-		paths = append(paths, filepath.Clean(modulePath))
-	}
-
-	return paths, nil
-}
-
-func parseAwesomeRegistryPaths(path string) ([]string, error) {
-	lines, err := readLines(path)
-	if err != nil {
-		return nil, err
-	}
-
-	paths := make([]string, 0, 8)
-	for _, line := range lines {
-		trimmed := strings.TrimSpace(line)
-		if !awesomeRowPattern.MatchString(trimmed) {
-			continue
-		}
-
-		parts := strings.Split(trimmed, "|")
-		if len(parts) < 4 {
-			continue
-		}
-
-		awesomePath := strings.TrimSpace(parts[2])
-		if awesomePath == "" {
-			continue
-		}
-
-		awesomePath = strings.TrimPrefix(awesomePath, "[")
-		if closeIdx := strings.Index(awesomePath, "]("); closeIdx >= 0 {
-			target := awesomePath[closeIdx+2:]
-			awesomePath = strings.TrimSuffix(target, ")")
-		}
-
-		clean := filepath.Clean(filepath.Join("awesome", strings.TrimPrefix(awesomePath, "./")))
-		paths = append(paths, clean)
-	}
-
-	return paths, nil
-}
-
-func isCodeFence(line string) bool {
-	return strings.HasPrefix(strings.TrimSpace(line), "```")
-}
-
-func parseSkillDoc(path string) (skillDoc, error) {
-	lines, err := readLines(path)
-	if err != nil {
-		return skillDoc{}, err
-	}
-
-	if len(lines) < 3 || strings.TrimSpace(lines[0]) != "---" {
-		return skillDoc{}, fmt.Errorf("missing YAML frontmatter")
-	}
-
-	frontmatterEnd := -1
-	for idx := 1; idx < len(lines); idx++ {
-		if strings.TrimSpace(lines[idx]) == "---" {
-			frontmatterEnd = idx
-			break
-		}
-	}
-	if frontmatterEnd == -1 {
-		return skillDoc{}, fmt.Errorf("frontmatter closing delimiter not found")
-	}
-
-	doc := skillDoc{
-		body: strings.Join(lines[frontmatterEnd+1:], "\n"),
-	}
-
-	for _, line := range lines[1:frontmatterEnd] {
-		trimmed := strings.TrimSpace(line)
-		if matches := skillNamePattern.FindStringSubmatch(trimmed); matches != nil {
-			doc.name = strings.Trim(strings.TrimSpace(matches[1]), `"'`)
-			continue
-		}
-		if matches := skillDescPattern.FindStringSubmatch(trimmed); matches != nil {
-			doc.description = strings.Trim(strings.TrimSpace(matches[1]), `"'`)
-		}
-	}
-
-	return doc, nil
-}
-
-func checkRequiredSubstrings(v *validator, path string, required ...string) {
-	lines, err := readLines(path)
-	if err != nil {
-		v.failf("%s cannot be read: %v", path, err)
+		c.fail(name, "line %d: invalid URL %q", line, dest)
 		return
 	}
-
-	fullText := strings.Join(lines, "\n")
-	for _, needle := range required {
-		if !strings.Contains(fullText, needle) {
-			v.failf("%s must mention %q", path, needle)
-		}
+	if (u.Scheme == "https" || u.Scheme == "http") && u.Host != "" {
+		return // External references are never fetched by this check.
+	}
+	if u.IsAbs() || u.Host != "" || strings.HasPrefix(u.Path, "/") || strings.Contains(u.Path, "\\") {
+		c.fail(name, "line %d: expected a relative policy link or HTTP(S) reference: %q", line, dest)
+		return
+	}
+	if u.Path == "" {
+		return // An anchor in the current document.
+	}
+	resolved := path.Join(path.Dir(name), u.Path)
+	if _, ok := c.docs[resolved]; !ok {
+		c.fail(name, "line %d: missing consumer document %q (resolved to %s)", line, dest, resolved)
 	}
 }
 
-func checkNormativeBullets(v *validator, filePath string, sectionTitle string) {
-	lines, err := readLines(filePath)
-	if err != nil {
-		v.failf("%s cannot be read: %v", filePath, err)
-		return
-	}
-
-	sectionLines, found := extractSection(lines, sectionTitle)
-	if !found {
-		return
-	}
-
-	inCodeBlock := false
-	for _, line := range sectionLines {
-		if isCodeFence(line) {
-			inCodeBlock = !inCodeBlock
-			continue
+func (c *checker) checkLinks() {
+	for name, body := range c.docs {
+		if strings.HasPrefix(name, "examples/") {
+			module := strings.Split(name, "/")[1]
+			if _, ok := c.docs["modules/"+module+"/doc.md"]; !ok {
+				c.fail(name, "example requires its %s module", module)
+			}
 		}
-		if inCodeBlock || !bulletPattern.MatchString(line) {
-			continue
-		}
-
-		if !normativeBullet.MatchString(line) {
-			v.failf("%s has non-normative bullet in %s: %s", filePath, sectionTitle, strings.TrimSpace(line))
-		}
+		proseLines(body, func(n int, line string) {
+			for _, match := range inlineLink.FindAllStringSubmatch(line, -1) {
+				c.checkLink(name, n, destination(match))
+			}
+			if match := definition.FindStringSubmatch(line); match != nil {
+				c.checkLink(name, n, destination(match))
+			}
+		})
 	}
 }
 
-func checkWorkingAgreementSemantics(v *validator, filePath string) {
-	lines, err := readLines(filePath)
-	if err != nil {
-		v.failf("%s cannot be read: %v", filePath, err)
-		return
-	}
-
-	sectionLines, found := extractSection(lines, sectionWorkingAgreement)
-	if !found {
-		return
-	}
-
-	inCodeBlock := false
-	for _, line := range sectionLines {
-		if isCodeFence(line) {
-			inCodeBlock = !inCodeBlock
+func (c *checker) checkCatalogs() {
+	modules := make(map[string]int)
+	proseLines(c.read("README.md"), func(_ int, line string) {
+		if row := moduleRow.FindStringSubmatch(strings.TrimSpace(line)); row != nil {
+			modules[row[2]]++
+			if row[2] != "modules/"+row[1]+"/doc.md" {
+				c.fail("README.md", "module key %q does not match %q", row[1], row[2])
+			}
+		}
+	})
+	libraries := make(map[string]int)
+	for _, line := range strings.Split(c.read("awesome/index.md"), "\n") {
+		cols := strings.Split(strings.TrimSpace(line), "|")
+		if len(cols) < 4 || cols[0] != "" {
 			continue
 		}
-		if inCodeBlock {
-			continue
+		target := strings.TrimSpace(cols[2])
+		if match := inlineLink.FindStringSubmatch(target); match != nil {
+			target = destination(match)
 		}
-
-		for _, pattern := range waForbiddenPatterns {
-			if pattern.MatchString(line) {
-				v.failf("%s has technical command/gate patterns in Working Agreements: %s", filePath, strings.TrimSpace(line))
-				return
+		if strings.HasSuffix(target, ".md") {
+			libraries[path.Join("awesome", target)]++
+		}
+	}
+	for name, body := range c.docs {
+		if ok, _ := path.Match("modules/*/doc.md", name); ok && modules[name] == 0 {
+			c.fail("README.md", "module missing from catalog: %s", name)
+		}
+		if ok, _ := path.Match("awesome/*.md", name); ok {
+			if libraries[name] == 0 {
+				c.fail("awesome/index.md", "library list missing from catalog: %s", name)
+			}
+			c.checkStatuses(name, body)
+		}
+	}
+	for catalog, counts := range map[string]map[string]int{"README.md": modules, "awesome/index.md": libraries} {
+		if len(counts) == 0 {
+			c.fail(catalog, "empty catalog")
+		}
+		for name, count := range counts {
+			if _, ok := c.docs[name]; !ok || count != 1 {
+				c.fail(catalog, "expected one entry pointing to an existing document: %s", name)
 			}
 		}
 	}
 }
 
-func checkModuleSectionLayout(v *validator, modulePath string) {
-	lines, err := readLines(modulePath)
-	if err != nil {
-		v.failf("%s cannot be read: %v", modulePath, err)
-		return
-	}
-
-	topLevelTitles := make([]string, 0, len(expectedTopLevelSections))
-	for _, line := range lines {
-		level, title, isHeading := parseHeading(line)
-		if isHeading && level == 1 {
-			topLevelTitles = append(topLevelTitles, title)
-		}
-	}
-
-	if len(topLevelTitles) != len(expectedTopLevelSections) {
-		v.failf("%s must contain exactly %d top-level sections; found %d", modulePath, len(expectedTopLevelSections), len(topLevelTitles))
-		return
-	}
-
-	for idx, expected := range expectedTopLevelSections {
-		if topLevelTitles[idx] != expected {
-			v.failf("%s has invalid top-level section order or names", modulePath)
+func (c *checker) checkStatuses(name, body string) {
+	rows := 0
+	proseLines(body, func(n int, line string) {
+		cols := strings.Split(strings.TrimSpace(line), "|")
+		if len(cols) < 4 || cols[0] != "" {
 			return
 		}
+		status := strings.TrimSpace(cols[2])
+		if status == "status" || strings.Trim(status, ":- ") == "" && strings.Contains(status, "-") {
+			return
+		}
+		if status != "required" && status != "preferred" && status != "banned" {
+			c.fail(name, "line %d: invalid library status %q", n, status)
+		}
+		rows++
+	})
+	if rows == 0 {
+		c.fail(name, "expected library choices with required, preferred or banned status")
 	}
 }
 
-func checkAwesomeFile(v *validator, awesomePath string) {
-	lines, err := readLines(awesomePath)
-	if err != nil {
-		v.failf("%s cannot be read: %v", awesomePath, err)
+func (c *checker) checkSkill() {
+	entries, err := filepath.Glob(filepath.Join(c.root, "skills", "*", "SKILL.md"))
+	if err != nil || len(entries) != 1 || entries[0] != filepath.Join(c.root, skillPath) {
+		c.fail("skills", "expected one apply-agent-docs skill entry point")
 		return
 	}
-
-	statusRows := 0
-	for _, line := range lines {
-		if awesomeStatusRow.MatchString(strings.TrimSpace(line)) {
-			statusRows++
-		}
+	body := strings.ReplaceAll(c.read(skillPath), "\r\n", "\n")
+	front, rest, ok := strings.Cut(strings.TrimPrefix(body, "---\n"), "\n---\n")
+	if !strings.HasPrefix(body, "---\n") || !ok || strings.TrimSpace(rest) == "" {
+		c.fail(skillPath, "expected YAML frontmatter and a skill body")
+		return
 	}
-
-	if statusRows == 0 {
-		v.failf("%s must include at least one library row with status required|preferred|banned", awesomePath)
+	fields := map[string]string{}
+	for _, line := range strings.Split(front, "\n") {
+		key, val, _ := strings.Cut(line, ":")
+		fields[key] = strings.Trim(strings.TrimSpace(val), "'\"")
+	}
+	if fields["name"] != "apply-agent-docs" || fields["description"] == "" {
+		c.fail(skillPath, "expected a matching name and non-empty description")
 	}
 }
 
-func checkSkillsLayout(v *validator) {
-	entries, err := os.ReadDir(skillsDirPath)
-	if err != nil {
-		v.failf("%s cannot be read: %v", skillsDirPath, err)
-		return
+func validate(root string, snapshot bool) []string {
+	c := &checker{root: root, docs: map[string]string{}}
+	info, err := os.Lstat(root)
+	if err != nil || !info.IsDir() {
+		return []string{root + ": expected a directory"}
 	}
-
-	if len(entries) == 0 {
-		v.failf("%s must contain at least one skill directory", skillsDirPath)
-		return
-	}
-
-	for _, entry := range entries {
-		entryPath := filepath.Join(skillsDirPath, entry.Name())
-		if strings.HasPrefix(entry.Name(), ".") {
-			continue
-		}
-		if !entry.IsDir() {
-			v.failf("%s must contain only skill directories; found file: %s", skillsDirPath, entryPath)
-			continue
-		}
-
-		skillPath := filepath.Join(entryPath, "SKILL.md")
-		if _, statErr := os.Stat(skillPath); statErr != nil {
-			v.failf("Skill directory is missing SKILL.md: %s", skillPath)
+	c.collect(snapshot)
+	if snapshot {
+		if info, err := os.Lstat(filepath.Join(root, "LICENSE")); err != nil || !info.Mode().IsRegular() {
+			c.fail("LICENSE", "include the upstream license")
 		}
 	}
-}
-
-func checkSkillFile(v *validator, skillPath string) {
-	doc, err := parseSkillDoc(skillPath)
-	if err != nil {
-		v.failf("%s is invalid: %v", skillPath, err)
-		return
-	}
-
-	folderName := filepath.Base(filepath.Dir(skillPath))
-	if doc.name == "" {
-		v.failf("%s must define frontmatter field: name", skillPath)
-	}
-	if doc.description == "" {
-		v.failf("%s must define frontmatter field: description", skillPath)
-	}
-	if doc.name != "" && doc.name != folderName {
-		v.failf("%s frontmatter name must match its folder name (%s)", skillPath, folderName)
-	}
-
-	fullText := strings.Join([]string{doc.name, doc.description, doc.body}, "\n")
-	lowerText := strings.ToLower(fullText)
-
-	if strings.Contains(fullText, "AGENTS.router.md") {
-		v.failf("%s must reference doc.md instead of deprecated AGENTS.router.md", skillPath)
-	}
-
-	switch folderName {
-	case "init-project-from-agent-docs":
-		if !strings.Contains(lowerText, "interview") {
-			v.failf("%s must require an architecture interview", skillPath)
-		}
-		if !strings.Contains(lowerText, "nested") {
-			v.failf("%s must describe nested AGENTS.md creation", skillPath)
-		}
-		if !strings.Contains(fullText, "Accept") {
-			v.failf("%s must require explicit Accept before writing", skillPath)
-		}
-	case "refresh-project-agents-from-agent-docs":
-		if !strings.Contains(lowerText, "signal") {
-			v.failf("%s must describe repository-signal based selection", skillPath)
-		}
-		if !strings.Contains(lowerText, "nested") {
-			v.failf("%s must describe nested AGENTS.md refresh", skillPath)
-		}
-		if !strings.Contains(lowerText, "frontend/") && !strings.Contains(lowerText, "apps/*") {
-			v.failf("%s must describe nested app or service boundaries", skillPath)
-		}
-		if !strings.Contains(fullText, "Accept") {
-			v.failf("%s must require explicit Accept before writing", skillPath)
-		}
-	case "refactor-project-to-agent-docs":
-		if !strings.Contains(lowerText, "interview") {
-			v.failf("%s must require an architecture interview", skillPath)
-		}
-		if !strings.Contains(lowerText, "subtree") && !strings.Contains(lowerText, "subproject") {
-			v.failf("%s must describe per-subtree or per-subproject refactoring", skillPath)
-		}
-		if !strings.Contains(lowerText, "plan") {
-			v.failf("%s must require a refactor plan before edits", skillPath)
-		}
-		if !strings.Contains(fullText, "Accept") {
-			v.failf("%s must require explicit Accept before refactoring", skillPath)
+	for _, name := range []string{"modules/common/doc.md", "modules/taskfile/doc.md"} {
+		if _, ok := c.docs[name]; !ok {
+			c.fail(name, "baseline module required")
 		}
 	}
+	c.checkLinks()
+	if !snapshot {
+		c.checkCatalogs()
+		c.checkSkill()
+	}
+	slices.Sort(c.failures)
+	return c.failures
 }
 
 func main() {
-	v := &validator{}
-
-	legacyFiles, err := filepath.Glob(moduleLegacyGlob)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "ERROR: legacy glob failure: %v\n", err)
+	snapshot := flag.String("snapshot", "", "validate a downstream policy directory and its local links")
+	flag.Parse()
+	if flag.NArg() != 0 {
+		flag.Usage()
+		os.Exit(2)
+	}
+	root := "."
+	if *snapshot != "" {
+		root = *snapshot
+	}
+	if failures := validate(root, *snapshot != ""); len(failures) > 0 {
+		fmt.Fprintln(os.Stderr, strings.Join(failures, "\n"))
 		os.Exit(1)
 	}
-	sort.Strings(legacyFiles)
-	for _, legacy := range legacyFiles {
-		v.failf("Legacy module file still exists: %s", legacy)
-	}
-
-	registryPaths, err := parseRegistryPaths(routerDocPath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "ERROR: %s cannot be parsed: %v\n", routerDocPath, err)
-		os.Exit(1)
-	}
-	if len(registryPaths) == 0 {
-		v.failf("No module registry paths found in %s canonical table", routerDocPath)
-	}
-
-	if _, err := os.Stat(awesomeIndexPath); err != nil {
-		v.failf("Awesome registry entrypoint not found: %s", awesomeIndexPath)
-	}
-
-	awesomeRegistryPaths, err := parseAwesomeRegistryPaths(awesomeIndexPath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "ERROR: %s cannot be parsed: %v\n", awesomeIndexPath, err)
-		os.Exit(1)
-	}
-	if len(awesomeRegistryPaths) == 0 {
-		v.failf("No awesome files found in %s table", awesomeIndexPath)
-	}
-
-	registrySet := make(map[string]struct{}, len(registryPaths))
-	for _, registryPath := range registryPaths {
-		if _, exists := registrySet[registryPath]; exists {
-			v.failf("Duplicate module registry path: %s", registryPath)
-			continue
-		}
-		registrySet[registryPath] = struct{}{}
-
-		if _, statErr := os.Stat(registryPath); statErr != nil {
-			v.failf("Registry path not found: %s", registryPath)
-		}
-	}
-
-	moduleDocs, err := filepath.Glob(moduleDocGlob)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "ERROR: module glob failure: %v\n", err)
-		os.Exit(1)
-	}
-	sort.Strings(moduleDocs)
-
-	for _, moduleDoc := range moduleDocs {
-		if _, exists := registrySet[moduleDoc]; !exists {
-			v.failf("Module doc is missing from %s registry: %s", routerDocPath, moduleDoc)
-		}
-		checkModuleSectionLayout(v, moduleDoc)
-	}
-
-	awesomeDocs, err := filepath.Glob(awesomeDocGlob)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "ERROR: awesome glob failure: %v\n", err)
-		os.Exit(1)
-	}
-	sort.Strings(awesomeDocs)
-
-	awesomeSet := make(map[string]struct{}, len(awesomeRegistryPaths))
-	for _, awesomePath := range awesomeRegistryPaths {
-		if _, exists := awesomeSet[awesomePath]; exists {
-			v.failf("Duplicate awesome registry path: %s", awesomePath)
-			continue
-		}
-		awesomeSet[awesomePath] = struct{}{}
-		if _, statErr := os.Stat(awesomePath); statErr != nil {
-			v.failf("Awesome registry path not found: %s", awesomePath)
-			continue
-		}
-		checkAwesomeFile(v, awesomePath)
-	}
-
-	for _, awesomeDoc := range awesomeDocs {
-		if awesomeDoc == awesomeIndexPath {
-			continue
-		}
-		if _, exists := awesomeSet[awesomeDoc]; !exists {
-			v.failf("Awesome file is missing from %s registry: %s", awesomeIndexPath, awesomeDoc)
-		}
-	}
-
-	checkSkillsLayout(v)
-
-	skillDocs, err := filepath.Glob(skillDocGlob)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "ERROR: skill glob failure: %v\n", err)
-		os.Exit(1)
-	}
-	sort.Strings(skillDocs)
-
-	if len(skillDocs) == 0 {
-		v.failf("No skill files found in %s", skillDocGlob)
-	}
-
-	for _, skillPath := range skillDocs {
-		checkSkillFile(v, skillPath)
-	}
-
-	checkRequiredSubstrings(v, routerDocPath, "nested `AGENTS.md`", "nearest `AGENTS.md`", "root `AGENTS.md`")
-	checkRequiredSubstrings(v, rootPolicyPath, "nested `AGENTS.md`", "subprojects", "multiple app or service boundaries")
-	checkRequiredSubstrings(v, "README.md", "nested `AGENTS.md`", "frontend/", "backend/")
-
-	filesToCheck := make([]string, 0, len(moduleDocs)+2)
-	filesToCheck = append(filesToCheck, rootPolicyPath, routerDocPath)
-	filesToCheck = append(filesToCheck, moduleDocs...)
-
-	for _, filePath := range filesToCheck {
-		checkNormativeBullets(v, filePath, sectionStrictRules)
-		checkNormativeBullets(v, filePath, sectionWorkingAgreement)
-		checkWorkingAgreementSemantics(v, filePath)
-	}
-
-	if err := v.report(); err != nil {
-		fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
-		os.Exit(1)
-	}
-
 	fmt.Println("Validation passed.")
 }

@@ -1,90 +1,24 @@
-# Overview
-This repository is the organization-wide AGENTS policy source.
-It stores strict project rules that define architecture policy including:
-- technology choices
-- code style
-- code quality tools
-- naming conventions
-- directory structure
-- code patterns
-- custom strict rules
+# Maintain the RevoTale engineering standard
 
-Based on the target project, stack modules are combined into root and nested `AGENTS.md` files via the appropriate skill when subprojects need more specific policy. It assembles project-specific rules while preserving shared conventions.
+Start with [README.md](README.md) for the catalog, scope and precedence of project rules. These instructions cover contributions to the central repository.
 
-# Folder Structure
-Current repository layout:
+## Change a rule
 
-```text
-<repo-root>/
-  AGENTS.md             # repository description (this file)
-  doc.md                # module routing and load conditions
-  awesome/              # enforced utility/library registry by stack or capability
-    index.md
-    <name>.md
-  shared/               # reusable cross-stack rulesets
-    <rule-name>.md
-  skills/               # skills used to integrate with these policies
-    <skill-name>/
-      SKILL.md
-  modules/              # stack-specific guidance
-    <module-name>/doc.md
-  examples/             # example files and authoring guidance
-    pattern-anti-pattern.md
-    <stack>/
-      index.md
-      <example>.md
-  <subproject>/
-    AGENTS.md           # nested policy for a specific app/service/package
+Put stack guidance in `modules/<stack>/doc.md`, shared rules in `shared/`, and library choices in the [registry](awesome/index.md). Link to the owner of a rule wherever another module needs it. Update the matching registry when adding, renaming or moving a document. Keep consumer links within the material a project can select.
+
+Give each distinct decision a descriptive heading. A short rule can be a sentence. For longer decisions, use **Why**, **Rule** and **Result** when they clarify the problem, required action and observable outcome. Put comparisons in [paired examples](examples/pattern-anti-pattern.md). Use project checks for enforceable constraints. Keep maintainer procedures here.
+
+## Change the workflow
+
+The [adoption guide](examples/adoption/README.md) owns the sync procedure. The [skill](skills/apply-agent-docs/SKILL.md) guides architecture selection, adoption and migration. Keep engineering requirements in the documents linked from the catalog. Record agreed decisions in those documents and obtain maintainer acceptance before finalizing a policy change.
+
+## Validate
+
+Run the same checks as [Woodpecker](.woodpecker/validate-agent-docs.yaml) from the repository root.
+
+```sh
+go test ./scripts/validate-agent-docs.go ./scripts/validate-agent-docs_test.go
+go run ./scripts/validate-agent-docs.go
 ```
 
-# Root AGENTS.md rules
-- `AGENTS.md` documents this repository only and does not define downstream project rules directly.
-- Root `AGENTS.md` should not update itself when new stack or shared rules are added. Keep it universal and focused on repository-level design.
-
-# Instructions
-
-## Root doc.md
-- Routing logic is maintained in `doc.md`.
-- `doc.md` must include references to all baseline and stack modules.
-- `doc.md` must provide a canonical table with short stack key, full stack name, module path, and `load_when`.
-- `doc.md` must instruct agents to always load baseline modules and load project-specific stacks by `load_when` signals.
-- `doc.md` must define when to create nested `AGENTS.md` files and how parent/child precedence works.
-- `doc.md` must define section semantics: `Strict rules` for technical constraints, and `Working Agreements` for user-agent interaction protocol.
-- `doc.md` must define how to load and enforce `awesome/index.md` and matching awesome files.
-- Changes to module paths or routing signals must update `doc.md` in the same change.
-- When adding a new stack, update `doc.md` with both the short stack key and full stack name.
-- Root `doc.md` should contain only routing/composition logic and helpers to assemble target `AGENTS.md`.
-
-## Target Output
-- Target repositories may contain a root `AGENTS.md` plus nested `AGENTS.md` files for subprojects with distinct stack, runtime, or ownership boundaries.
-- Root `AGENTS.md` should stay repository-wide; nested `AGENTS.md` files should narrow rules for their subtree.
-- Nested `AGENTS.md` files should be created only for meaningful architecture boundaries such as apps, services, or packages with distinct tooling.
-
-## Stack
-- Stack-specific guidance is maintained in `modules/*/doc.md`.
-- Enforced stack or capability libraries/utilities are maintained in `awesome/*`.
-- If equivalent rules are shared by multiple stack modules, extract them to `shared/<rule-name>.md`.
-- Stack modules must link extracted shared rules by relative path (for module files: `[shared/<rule-name>.md](../../shared/<rule-name>.md)`).
-- Keep shared files concrete and tool-focused; stack modules should keep only stack-specific additions.
-
-## Examples
-- Example authoring guidance is maintained in `examples/pattern-anti-pattern.md`.
-- Example files under `examples/` must follow that comparison contract.
-- Stack-specific example indexes such as `examples/<stack>/index.md` should point to the relevant example files and may reference the shared authoring guide.
-
-## Skills
-- Skills are maintained in `skills/<skill-name>/SKILL.md`.
-- Skills must treat `doc.md` and `awesome/index.md` as the source of truth and must not introduce alternate router filenames.
-- Skills must support root and nested `AGENTS.md` output when the repository contains multiple app or service boundaries.
-- Skills that initialize from scratch or refactor existing repositories must run an architecture interview before selecting modules or refactoring code.
-- Skills must wait for explicit `Accept` before writing `AGENTS.md` or performing architecture-driven refactors.
-- Skills that mutate an existing codebase must propose a phased plan before editing files.
-
-## Rules combination
-Rules in this project must be combined so a target agent can merge them into a single `AGENTS.md` using the contract defined in `doc.md`.
-
-# Working Agreements
-- MUST ask interview questions when policy intent or requested changes are ambiguous.
-- MUST wait for explicit `Accept` before finalizing any policy text change.
-- MUST document user-approved technical exceptions in the relevant `Strict rules` section.
-- MUST keep `Working Agreements` interaction-only; technical commands, checks, and invariants MUST be defined in `Strict rules`.
+For changes to selection, also exercise a new project and an existing project with a different runtime. Check the selected files and links and verify that unrelated tooling survives adoption.
