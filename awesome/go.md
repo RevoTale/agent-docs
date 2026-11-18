@@ -1,4 +1,5 @@
-# Awesome: Go
+# Go library choices
+
 Enforced utility/library choices for Go stacks.
 
 | capability | status | package | source | notes |

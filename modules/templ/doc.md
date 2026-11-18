@@ -1,28 +1,18 @@
-# Overview
-This module defines authoring rules for repositories that use `templ` to render HTML from Go.
-It covers rendering boundaries, component ownership, styling, composition, and client-side integration.
-See paired examples in [../../examples/templ/index.md](../../examples/templ/index.md).
-For deeper templ syntax and behavior details, see `https://templ.guide/llms.md`.
+# Rendering HTML with templ
 
-# Project structure
-```text
-<go-templ-repo-root>/
-  AGENTS.md
-  go.mod
-  <feature>/
-    <component>.templ
-```
+Use the [Go module](../go/doc.md) and keep feature-owned components in their feature directory as `.templ` files. Each rule below links to a focused example. The [example index](../../examples/templ/index.md) lists them all.
 
-# Strict rules
-## Setup and Generation
-- MUST read enforced utility/library choices from [../../awesome/index.md](../../awesome/index.md) and [../../awesome/go.md](../../awesome/go.md) before introducing, replacing, or removing templ usage.
+For syntax and rendering semantics, see the [templ reference](https://templ.guide/).
+
+## Setup and generation
+- Consult the [Go library choices](../../awesome/go.md) before introducing, replacing, or removing templ.
   Example: [../../examples/templ/awesome-registry.md](../../examples/templ/awesome-registry.md)
 - MUST use `github.com/a-h/templ` for the `html-templating` capability in Go repositories.
   Example: [../../examples/templ/templ-library-choice.md](../../examples/templ/templ-library-choice.md)
 - MUST keep generated templ Go files in sync with `*.templ` sources.
   Example: [../../examples/templ/generated-files-sync.md](../../examples/templ/generated-files-sync.md)
 
-## Rendering and Data Boundaries
+## Rendering and data boundaries
 - MUST keep templ components focused on rendering and light presentation logic.
   Example: [../../examples/templ/rendering-boundary.md](../../examples/templ/rendering-boundary.md)
 - MUST prepare display-specific data in Go before render when domain models do not match the UI shape, and SHOULD prefer explicit view models at that boundary.
@@ -36,7 +26,12 @@ For deeper templ syntax and behavior details, see `https://templ.guide/llms.md`.
 - SHOULD read request-scoped context in templates through small typed helper functions rather than raw `ctx.Value(...).(T)` expressions in markup.
   Example: [../../examples/templ/typed-ctx-access.md](../../examples/templ/typed-ctx-access.md)
 
-## Styling and Component Ownership
+Clarify whether context use is intentional when an explicit parameter could carry the same data.
+
+## Styling and component ownership
+
+Clarify ownership when it is unclear whether a selector belongs to one component or forms a shared contract.
+
 - SHOULD keep each visual component family self-contained in one owning `.templ` file when markup and local styling belong together.
   Example: [../../examples/templ/self-contained-component-family.md](../../examples/templ/self-contained-component-family.md)
 - SHOULD define component-local selectors with `css name() { ... }` in the same `.templ` file as the component that owns them.
@@ -63,10 +58,11 @@ For deeper templ syntax and behavior details, see `https://templ.guide/llms.md`.
   Example: [../../examples/templ/css-variable-ownership.md](../../examples/templ/css-variable-ownership.md)
 - SHOULD keep static defaults in `css {}` or global CSS, and use `style={ ... }` mainly for per-render overrides from an owning parent or root.
   Example: [../../examples/templ/css-static-defaults.md](../../examples/templ/css-static-defaults.md)
-- MUST prefer one component with parameters and conditional classes over duplicated markup branches when the structure is the same. 
+- MUST prefer one component with parameters and conditional classes over duplicated markup branches when the structure is the same.
   Example: [../../examples/templ/component-variants.md](../../examples/templ/component-variants.md)
 
 ## Composition APIs
+
 - SHOULD use `children...` for one unnamed wrapped body.
   Example: [../../examples/templ/children-body.md](../../examples/templ/children-body.md)
 - SHOULD use `templ.Component` parameters for explicit named slots such as `header`, `body`, `footer`, or `actions`.
@@ -74,7 +70,7 @@ For deeper templ syntax and behavior details, see `https://templ.guide/llms.md`.
 - MUST use `templ.Attributes` spread for wrapper-style composition and pass-through attributes.
   Example: [../../examples/templ/attributes-spread.md](../../examples/templ/attributes-spread.md)
 
-## Client Scripts and Integrations
+## Client scripts and integrations
 - SHOULD use standard `<script>` tags and standalone JS modules for client behavior that spans multiple elements or needs stable DOM hooks.
   Example: [../../examples/templ/standard-script-modules.md](../../examples/templ/standard-script-modules.md)
 - MAY use `templ.JSFuncCall` for small direct `on*` handlers when that is the simplest safe fit.
@@ -89,8 +85,3 @@ For deeper templ syntax and behavior details, see `https://templ.guide/llms.md`.
   Example: [../../examples/templ/non-standard-url-attrs.md](../../examples/templ/non-standard-url-attrs.md)
 - SHOULD use `templ.JSONString` or `templ.JSONScript` when client code needs structured server data.
   Example: [../../examples/templ/structured-json.md](../../examples/templ/structured-json.md)
-
-# Working Agreements
-- MUST follow root interaction protocol from [../../AGENTS.md](../../AGENTS.md) before finalizing policy changes.
-- MUST ask whether a selector is local component styling or a shared cross-component contract when that ownership is ambiguous.
-- MUST ask whether `ctx` usage is intentional when the same data could be passed explicitly as component parameters.

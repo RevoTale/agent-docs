@@ -1,6 +1,5 @@
 # templ Examples
-Follow the shared authoring guidance in [../pattern-anti-pattern.md](../pattern-anti-pattern.md).
-One dedicated example file per strict rule in [modules/templ/doc.md](../../modules/templ/doc.md).
+Each example illustrates one of the [templ rules](../../modules/templ/doc.md) with a pattern and an anti-pattern.
 
 - [awesome-registry.md](./awesome-registry.md)
 - [templ-library-choice.md](./templ-library-choice.md)

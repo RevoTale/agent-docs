@@ -1,23 +1,18 @@
-# Overview
-This module defines baseline rules that apply to every repository regardless of stack.
+# Standards for every project
 
-# Project structure
-```text
-<repo-root>/
-  AGENTS.md
-  renovate.json
-```
+## Development workflow
 
-# Strict rules
-- MUST reuse Taskfile workflow rules for all projects: [../taskfile/doc.md](../taskfile/doc.md).
-- MUST follow the organization-wide OS and base image selection policy: [shared/os-and-base-images.md](../../shared/os-and-base-images.md).
-- MUST follow the organization-wide dependency and Renovate policy: [shared/dependency-management.md](../../shared/dependency-management.md).
-- MUST use Taskfile as the default workflow runner across modules.
-- MUST keep this module scoped to repository-wide baseline rules only; stack-specific rules belong in stack modules.
-- MUST require `task validate` to pass before merge.
-- MUST require `task test` to pass when the project defines `task test`.
-- SHOULD add rules incrementally, and each new rule SHOULD be concrete, testable, and scoped.
+Use the [Taskfile workflow](../taskfile/doc.md) as the project entry point.
+Before merge, `task validate` must pass, along with `task test` when the project defines it.
 
-# Working Agreements
-- MUST follow root interaction protocol from [../../AGENTS.md](../../AGENTS.md) before finalizing policy changes.
-- MUST ask user to move stack-specific requests into the matching stack module instead of common.
+## Dependencies and environments
+
+Keep `renovate.json` at the repository root and follow the [dependency policy](../../shared/dependency-management.md) when adding or updating packages and images.
+Use the [OS and base image policy](../../shared/os-and-base-images.md) when choosing or changing an environment.
+
+## Library choices
+
+Consult the project's selected library tables before introducing, replacing, or removing a library.
+Each row applies only when the project needs that capability. Use the listed package for a `required` row,
+prefer the listed package for a `preferred` row, and exclude a `banned` package.
+For a deviation from a required choice, obtain explicit maintainer approval and record its scope and reason in the project.

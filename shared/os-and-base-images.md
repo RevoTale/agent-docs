@@ -1,9 +1,9 @@
-# Overview
+# Operating systems and base images
 This policy defines the organization-wide defaults for operating systems and OCI-compatible base images.
 Apply it when creating an environment or changing its OS or base image. Do not migrate a working environment solely
 to conform to this policy unless the task explicitly includes that migration.
 
-# Decision order
+## Decision order
 Select an OS or base image in this order:
 
 1. Correctness and compatibility with the workload.
@@ -14,7 +14,7 @@ Select an OS or base image in this order:
 Image size alone does not demonstrate lower runtime energy consumption. Measure the real workload when energy or
 resource efficiency is a goal.
 
-# Standard selection
+## Standard selection
 Use this table before considering an alternative distribution or image family.
 
 | Environment | Default | Use when |
@@ -29,7 +29,7 @@ Debian Trixie is the default OS release. Use an explicit release codename or ver
 as `latest`. See the [Debian Trixie release information](https://www.debian.org/releases/trixie/) and the
 [Debian Official Image](https://hub.docker.com/_/debian).
 
-# Strict rules
+## Build and runtime requirements
 - MUST use Debian Trixie when selecting an OS for bare metal, virtual machines, CI runners, development environments, and other general-purpose environments unless an exception below applies.
 - MUST prefer a supported Debian Trixie variant of a language, tool, application, or service image when upstream provides one.
 - MUST use `debian:trixie` for custom general-purpose OCI build, test, CI, and debugging stages that need a shell, package manager, or broader userspace.
@@ -44,11 +44,11 @@ as `latest`. See the [Debian Trixie release information](https://www.debian.org/
 The Distroless project documents the static image's contents, supported Debian 13 tags, and lack of a shell and package
 manager in its [official repository](https://github.com/GoogleContainerTools/distroless).
 
-# Situational alternatives
+## Situational alternatives
 - MAY use Alpine when upstream requires or explicitly recommends it, or when a measured footprint constraint justifies it and musl compatibility is verified by the relevant tests.
 - MAY use Ubuntu LTS when hardware enablement, vendor support, CI infrastructure, or the hosting platform requires it.
 - MUST prefer a supported Debian-based upstream image over another upstream variant unless maintainers explicitly recommend otherwise.
 - MUST use the upstream official image when third-party software has no supported Debian-based image.
 - MUST NOT rebuild third-party software images on Debian solely to satisfy the Debian default.
 - MUST document which condition justified a situational alternative in the change or pull request.
-- MUST obtain explicit user `Accept` before selecting any OS distribution or base image family not covered by this policy, and MUST document the approved exception in the relevant `Strict rules` section.
+- MUST obtain explicit user `Accept` before selecting any OS distribution or base image family not covered by this policy, and MUST document the approved exception in the project's scoped policy notes.

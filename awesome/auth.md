@@ -1,4 +1,5 @@
-# Awesome: Auth
+# Identity and access libraries
+
 Choices for authentication, authorization, identity, OAuth2, OIDC, and access-policy capabilities.
 
 | capability | status | package | source | notes |

@@ -1,4 +1,5 @@
-# Awesome: Next.js
+# Next.js library choices
+
 Enforced utility/library choices for Next.js stacks.
 
 | capability | status | package | source | notes |

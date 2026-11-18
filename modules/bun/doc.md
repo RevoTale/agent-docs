@@ -1,27 +1,13 @@
-# Overview
-This module defines baseline engineering rules for Bun-based repositories and applications.
+# Bun
 
-# Project structure
-```text
-<bun-repo-root>/
-  AGENTS.md
-  package.json
-  bun.lock|bun.lockb
-  biome.json
-```
+Apply this module where a working project already requires Bun or maintainers explicitly select it. Obtain explicit approval before migrating that project to another runtime or package manager.
 
-# Strict rules
-- MUST reuse shared baseline rules: [../../shared/js-biome-core.md](../../shared/js-biome-core.md).
-- MUST reuse shared conventions: [../../shared/biome-conventions.md](../../shared/biome-conventions.md).
-- MUST treat Bun as an explicit alternative to the default Node.js and pnpm stack.
-- MUST use Bun only when an existing repository already requires it or maintainers explicitly select it.
-- MUST use Bun as the only runtime and package manager.
-- MUST use `bun install` for dependency management.
-- MUST use `bun run` for project scripts.
-- MUST route test execution through Taskfile (`task validate` and `task test`); Taskfile tasks MAY invoke `bun test`.
-- SHOULD prefer `bun install --backend=copyfile` for containerized installs to avoid hardlink issues.
-- MUST orchestrate Bun commands through Taskfile tasks in local and CI workflows.
+## Packages and workflows
 
-# Working Agreements
-- MUST follow root interaction protocol from [../../AGENTS.md](../../AGENTS.md) before finalizing policy changes.
-- MUST ask for explicit `Accept` before migrating an existing Bun repository to another runtime or package manager.
+Use Bun as the only runtime and package manager within this project boundary. Use `bun install` for dependencies and `bun run` for scripts. In containers, prefer `bun install --backend=copyfile` when hardlinks cause installation problems.
+
+Expose local and CI workflows through Taskfile. Use `task validate` and `task test` as project entry points. The underlying test task may invoke `bun test`.
+
+## Code quality
+
+Apply the [Biome baseline](../../shared/js-biome-core.md) and [configuration conventions](../../shared/biome-conventions.md).
