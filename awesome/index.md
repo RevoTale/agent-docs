@@ -8,6 +8,7 @@ Rules:
 
 | key | awesome_file | scope |
 | --- | --- | --- |
+| ai-inference | ./ai-inference.md | Self-hosted inference with predefined models |
 | go | ./go.md | Go runtime, backend services, Go templating, and Go GraphQL client |
 | javascript | ./javascript.md | JavaScript and TypeScript libraries published to npm |
 | auth | ./auth.md | Authentication, authorization, identity, OAuth2, OIDC, and policy enforcement |
